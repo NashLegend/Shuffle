@@ -3,7 +3,9 @@ package com.example.shuffle;
 
 import java.util.ArrayList;
 
+import android.R.integer;
 import android.os.Bundle;
+import android.animation.AnimatorSet;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
@@ -48,6 +50,10 @@ public class MainActivity extends Activity {
     private int lastZone = 0;
     private int lastRow = 0;
     private int lastCol = 0;
+
+    private AnimatorSet selectedAnimatorSet = new AnimatorSet();
+    private AnimatorSet unselectedAnimatorSet = new AnimatorSet();
+    private AnimatorSet betweenAnimatorSet = new AnimatorSet();
 
     private MovableButton currentButton;
 
@@ -184,20 +190,66 @@ public class MainActivity extends Activity {
 
     private void getCurrentXone() {
         PointF pointF = getCurrentButtonCenter();
+        int crtZone = 0;
+        int crtRow = 0;
+        int crtCol = 0;
         if (pointF.y > selectedButtonsTotalHeight + groupVGap) {
-            // zone=0
-            // pointF.x/buttonCellWidth;
-            // pointF.y-unselectedButtonsVertex.y/buttonCellHeight-1;
+            crtZone = 2;
+            crtRow = (int) (pointF.x / buttonCellWidth);
+            crtCol = (int) (pointF.y - unselectedButtonsVertex.y / buttonCellHeight - 1);
+            if (lastZone != crtZone) {
+                // pre zone is 0
+                // even zone changed,shuffle
+            } else {
+                if (crtCol != lastCol || crtRow != lastRow) {
+                    ArrayList<MovableButton> buttons = getAnimatedButtonsBetween(crtZone,
+                            crtRow, crtCol, lastRow, lastCol);
+                    if (crtRow * Colums + crtCol > lastRow * Colums + lastCol) {
+
+                    } else {
+                        // moveforwards
+                    }
+                    lastCol = crtCol;
+                    lastRow = crtRow;
+                    lastZone = crtZone;
+                }
+            }
         } else if (pointF.y > selectedButtonsTotalHeight) {
-            // 1
+            // must shuffle
+            crtZone = 1;
+            crtRow = lastRow;
+            crtCol = lastCol;
         } else {
-            // 2
-            // pointF.x/buttonCellWidth;
-            // pointF.y/buttonCellHeight-1;
+            crtZone = 0;
+            crtRow = (int) (pointF.x / buttonCellWidth);
+            crtCol = (int) (pointF.y / buttonCellHeight - 1);
         }
         lastZone = 0;
         lastRow = 0;
         lastCol = 0;
+    }
+
+    private void setupAnimator(int zone, ArrayList<MovableButton> buttons, boolean forwards) {
+        if (zone == 0) {
+            // selected
+        } else if (zone == 2) {
+            // unselectedzone
+        }
+    }
+
+    private ArrayList<MovableButton> getAnimatedButtonsBetween(int zone, int crtRow, int crtCol,
+            int lastRow, int lastCol) {
+        return null;
+    }
+
+    private ArrayList<MovableButton> getAnimatedButtonsBefore(int zone,
+            int lastRow, int lastCol) {
+        return null;
+    }
+
+    private ArrayList<MovableButton> getAnimatedButtonsAfter(int zone,
+            int lastRow, int lastCol) {
+        return null;
     }
 
     private PointF getCurrentButtonCenter() {
