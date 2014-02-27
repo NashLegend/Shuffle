@@ -1,56 +1,90 @@
-
 package com.example.shuffle;
 
+import android.animation.AnimatorSet;
 import android.content.Context;
 import android.graphics.Point;
 import android.util.Log;
 import android.widget.Button;
 
 public class MovableButton extends Button {
-    private String title = "";
-    private int id = 1;
-    private Point position=new Point(0, 0);
-    private boolean selected=false;
+	private String title = "";
+	private int id = 1;
+	private Point position = new Point(0, 0);
+	private Point targetPosition = new Point(0, 0);
 
-    public MovableButton(Context context) {
-        super(context);
-    }
+	public Point getTargetPosition() {
+		return targetPosition;
+	}
 
-    public String getTitle() {
-        return title;
-    }
+	public void setTargetPosition(Point targetPosition) {
+		this.targetPosition = targetPosition;
+	}
 
-    public void setTitle(String title) {
-        this.title = title;
-        setText(title);
-    }
+	private boolean selected = false;
+	private AnimatorSet animatorSet = new AnimatorSet();
 
-    public int getId() {
-        return id;
-    }
+	public MovableButton(Context context) {
+		super(context);
+	}
 
-    public void setId(int id) {
-        this.id = id;
-    }
+	public void setTargetPositionIsNext() {
+		if (targetPosition.x < (MainActivity.Colums - 1)) {
+			targetPosition.x++;
+		} else {
+			targetPosition.x = 0;
+			targetPosition.y++;
+		}
+	}
 
-    private void slog(String string) {
-        Log.i("shuffle", string);
-    }
+	public void setTargetPositionIsPrev() {
+		if (targetPosition.x == 0 && targetPosition.y > 0) {
+			targetPosition.x = MainActivity.Colums - 1;
+			targetPosition.y--;
+		} else if (targetPosition.x > 0) {
+			targetPosition.x--;
+		}
+	}
 
-    public Point getPosition() {
-        return position;
-    }
+	public void startAnimator(Point anchorPoint) {
+		// TODO
+		// 如果起止位置相差太小则无动画
+	}
 
-    public void setPosition(Point position) {
-        this.position = position;
-    }
+	public String getTitle() {
+		return title;
+	}
 
-    public boolean isSelected() {
-        return selected;
-    }
+	public void setTitle(String title) {
+		this.title = title;
+		setText(title);
+	}
 
-    public void setSelected(boolean selected) {
-        this.selected = selected;
-    }
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	private void slog(String string) {
+		Log.i("shuffle", string);
+	}
+
+	public Point getPosition() {
+		return position;
+	}
+
+	public void setPosition(Point position) {
+		this.position = position;
+	}
+
+	public boolean isSelected() {
+		return selected;
+	}
+
+	public void setSelected(boolean selected) {
+		this.selected = selected;
+	}
 
 }
