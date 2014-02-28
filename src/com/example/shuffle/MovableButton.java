@@ -9,6 +9,10 @@ import android.graphics.Point;
 import android.util.Log;
 import android.widget.Button;
 
+/**
+ * @author NashLegend
+ *
+ */
 public class MovableButton extends Button {
     private String title = "";
     private int id = 1;

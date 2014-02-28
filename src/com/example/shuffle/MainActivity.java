@@ -65,7 +65,7 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		RelativeLayout rootLayout = (RelativeLayout) findViewById(R.id.ctt);
-		board = new ShuffleBoard(this);
+		board = new RelativeLayout(this);
 		board.setLayoutParams(new LayoutParams(-1, -1));
 		rootLayout.addView(board);
 		middleView = new View(this);
@@ -240,6 +240,16 @@ public class MainActivity extends Activity {
 			aniZone = crtZone;
 			crtCol = (int) (pointF.x / buttonCellWidth);
 			crtRow = (int) ((pointF.y - unselectedButtonsVertex.y) / buttonCellHeight);
+			if (crtRow < 0) {
+				//不可达
+				crtRow = 0;
+			}
+			if (crtCol < 0) {
+				crtCol = 0;
+			}
+			if (crtCol >= Colums) {
+				crtCol = Colums - 1;
+			}
 			if (lastZone != crtZone) {
 				if (lastZone == 1) {
 					slog("from DOWN_After" + currentButton.getText());
@@ -274,6 +284,12 @@ public class MainActivity extends Activity {
 			crtRow = (int) (pointF.y / buttonCellHeight);
 			if (crtRow < 0) {
 				crtRow = 0;
+			}
+			if (crtCol < 0) {
+				crtCol = 0;
+			}
+			if (crtCol >= Colums) {
+				crtCol = Colums - 1;
 			}
 			if (lastZone != crtZone) {
 				if (lastZone == 1) {
@@ -461,7 +477,10 @@ public class MainActivity extends Activity {
 
 	private PointF getCurrentButtonCenter() {
 		if (currentButton != null) {
-			return new PointF(currentButton.getX() + buttonCellWidth / 2 + dy,
+			//加dx dy是因为这样才是手指的位置，因为刚才进行的setx  sety并没有立即生效，要在下一帧才能生效
+			//当然不加上dx dy也可以，但是那样就会导致事实上的落后一帧，不过没有人能看。
+			//不加dx dy的另一缺点是，在最后手指up的时候无法获得准确的最后的位置，因为这时候还按钮还没有到达手指处
+			return new PointF(currentButton.getX() + buttonCellWidth / 2 + dx,
 					currentButton.getY() + buttonCellHeight / 2 + dy);
 		} else {
 			return null;
@@ -490,6 +509,16 @@ public class MainActivity extends Activity {
 			aniZone = crtZone;
 			crtCol = (int) (pointF.x / buttonCellWidth);
 			crtRow = (int) ((pointF.y - unselectedButtonsVertex.y) / buttonCellHeight);
+			if (crtRow < 0) {
+				//不可达
+				crtRow = 0;
+			}
+			if (crtCol < 0) {
+				crtCol = 0;
+			}
+			if (crtCol >= Colums) {
+				crtCol = Colums - 1;
+			}
 			Point point = new Point(crtCol, crtRow);
 			int ind = crtRow * Colums + crtCol;
 			slog(ind + ",,,,,,,,,," + unselectedButtons.size());
@@ -539,6 +568,12 @@ public class MainActivity extends Activity {
 			crtRow = (int) (pointF.y / buttonCellHeight);
 			if (crtRow < 0) {
 				crtRow = 0;
+			}
+			if (crtCol < 0) {
+				crtCol = 0;
+			}
+			if (crtCol >= Colums) {
+				crtCol = Colums - 1;
 			}
 
 			Point point = new Point(crtCol, crtRow);
