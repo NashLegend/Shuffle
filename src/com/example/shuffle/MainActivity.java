@@ -751,6 +751,7 @@ public class MainActivity extends Activity {
 				point.y = i / Colums;
 				button.setPosition(point);
 				button.setTargetPosition(new Point(point.x, point.y));
+
 				button.setXX(point.x * buttonCellWidth);
 				button.setYY(unselectedButtonsVertex.y + point.y
 						* buttonCellHeight);
