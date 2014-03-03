@@ -61,8 +61,6 @@ public class MainActivity extends Activity {
 
     private MovableButton currentButton;
 
-    private boolean pressed = false;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -162,22 +160,25 @@ public class MainActivity extends Activity {
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-            if (currentButton == null || currentButton == v) {
+            if ((currentButton == null && event.getAction() == MotionEvent.ACTION_DOWN)
+                    || currentButton == v) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        currentButton = (MovableButton) v;
-                        if (currentButton.isSelected()) {
-                            lastZone = SELECTED_ZONE;
-                        } else {
-                            lastZone = UNSELECTED_ZONE;
+                        if (currentButton == null) {
+                            currentButton = (MovableButton) v;
+                            if (currentButton.isSelected()) {
+                                lastZone = SELECTED_ZONE;
+                            } else {
+                                lastZone = UNSELECTED_ZONE;
+                            }
+                            lastRow = currentButton.getPosition().y;
+                            lastCol = currentButton.getPosition().x;
+                            slog("down: " + lastZone + "_" + lastRow + "_" + lastCol);
+                            slog("the First real pos is " + currentButton.getX() + ","
+                                    + currentButton.getY());
+                            lastX = event.getRawX();
+                            lastY = event.getRawY();
                         }
-                        lastRow = currentButton.getPosition().y;
-                        lastCol = currentButton.getPosition().x;
-                        slog("down: " + lastZone + "_" + lastRow + "_" + lastCol);
-                        slog("the First real pos is " + currentButton.getX() + ","
-                                + currentButton.getY());
-                        lastX = event.getRawX();
-                        lastY = event.getRawY();
                         break;
                     case MotionEvent.ACTION_MOVE:
                         dx = event.getRawX() - lastX;
@@ -207,8 +208,6 @@ public class MainActivity extends Activity {
 
     private void moveButton(View button, float dx, float dy) {
         slog("\n*************************************\n");
-        slog("the expected pos is " + (button.getX() + dx) + ","
-                + (button.getY() + dy));
         button.setX(button.getX() + dx);
         button.setY(button.getY() + dy);
         getCurrentXone();
@@ -220,9 +219,11 @@ public class MainActivity extends Activity {
         int crtRow = 0;
         int crtCol = 0;
         int aniZone = -1;
-        ArrayList<MovableButton> buttons = null;
+        ArrayList<MovableButton> buttons = new ArrayList<MovableButton>();
+        if (pointF == null) {
+            return;
+        }
         if (pointF.y > unselectedButtonsVertex.y) {
-            slog("pointF is " + pointF.x + "_" + pointF.y);
             crtZone = UNSELECTED_ZONE;
             aniZone = crtZone;
             crtCol = (int) (pointF.x / buttonCellWidth);
@@ -442,9 +443,6 @@ public class MainActivity extends Activity {
 
     private PointF getCurrentButtonCenter() {
         if (currentButton != null) {
-            // 加dx dy是因为这样才是手指的位置，因为刚才进行的setx sety并没有立即生效，要在下一帧才能生效
-            // 当然不加上dx dy也可以，但是那样就会导致事实上的落后一帧，不过没有人能看。
-            // 不加dx dy的另一缺点是，在最后手指up的时候无法获得准确的最后的位置，因为这时候还按钮还没有到达手指处
             return new PointF(currentButton.getX() + buttonWidth / 2,
                     currentButton.getY() + buttonHeight / 2);
         } else {
@@ -459,6 +457,9 @@ public class MainActivity extends Activity {
         int crtCol = 0;
         int aniZone = -1;
         ArrayList<MovableButton> buttons = new ArrayList<MovableButton>();
+        if (pointF == null) {
+            return;
+        }
         if (pointF.y > unselectedButtonsVertex.y) {
             // 处在非选择区，如果不在最后一个之后则取
             crtZone = UNSELECTED_ZONE;
