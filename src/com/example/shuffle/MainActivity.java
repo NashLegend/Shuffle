@@ -4,6 +4,7 @@ package com.example.shuffle;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.animation.AnimatorSet;
@@ -43,6 +44,7 @@ public class MainActivity extends Activity {
     private int hGap = 0;
     public static int buttonCellWidth = 0;
     public static int buttonCellHeight = 0;
+    public static int ver=11;
     private int groupVGapDip = 60;
     private int groupVGap = 0;
     private Point selectedButtonsVertex = new Point(0, 0);
@@ -52,8 +54,6 @@ public class MainActivity extends Activity {
     private int lastZone = 0;
     private int lastRow = 0;
     private int lastCol = 0;
-    private float dx = 0;
-    private float dy = 0;
 
     private static final int SELECTED_ZONE = 0;
     private static final int MIDDLE_ZONE = 1;
@@ -157,6 +157,8 @@ public class MainActivity extends Activity {
 
         private float lastX = 0f;
         private float lastY = 0f;
+        private float ddx = 0f;
+        private float ddy = 0f;
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
@@ -174,27 +176,27 @@ public class MainActivity extends Activity {
                             lastRow = currentButton.getPosition().y;
                             lastCol = currentButton.getPosition().x;
                             slog("down: " + lastZone + "_" + lastRow + "_" + lastCol);
-                            slog("the First real pos is " + currentButton.getX() + ","
-                                    + currentButton.getY());
+                            slog("the First real pos is " + currentButton.getXX() + ","
+                                    + currentButton.getYY());
                             lastX = event.getRawX();
                             lastY = event.getRawY();
+                            ddx = event.getX();
+                            ddy = event.getY();
                         }
                         break;
                     case MotionEvent.ACTION_MOVE:
-                        dx = event.getRawX() - lastX;
-                        dy = event.getRawY() - lastY;
+                        float dx = event.getRawX() - lastX;
+                        float dy = event.getRawY() - lastY;
                         if (dx * dx + dy * dy > 1) {
                             lastX = event.getRawX();
                             lastY = event.getRawY();
-                            moveButton(v, dx, dy);
+                            moveButton(event.getRawX() - ddx, event.getRawY() - ddy);
                         }
                         break;
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_CANCEL:
                         slog("OK Here it is up ~~~~~~~~~~~~");
-                        dx = event.getRawX() - lastX;
-                        dy = event.getRawY() - lastY;
-                        moveButton(v, dx, dy);
+                        moveButton(event.getRawX() - ddx, event.getRawY() - ddy);
                         putButtonDown();
                         remeasure();
                         break;
@@ -206,10 +208,14 @@ public class MainActivity extends Activity {
         }
     };
 
-    private void moveButton(View button, float dx, float dy) {
+    private void moveButton(float dx, float dy) {
         slog("\n*************************************\n");
-        button.setX(button.getX() + dx);
-        button.setY(button.getY() + dy);
+        int[] location = {
+                0, 0
+        };
+         board.getLocationOnScreen(location);
+        currentButton.setXX(dx - location[0]);
+        currentButton.setYY(dy - location[1]);
         getCurrentXone();
     }
 
@@ -443,8 +449,8 @@ public class MainActivity extends Activity {
 
     private PointF getCurrentButtonCenter() {
         if (currentButton != null) {
-            return new PointF(currentButton.getX() + buttonWidth / 2,
-                    currentButton.getY() + buttonHeight / 2);
+            return new PointF(currentButton.getXX() + buttonWidth / 2,
+                    currentButton.getYY() + buttonHeight / 2);
         } else {
             return null;
         }
