@@ -2,18 +2,16 @@
 package com.example.shuffle;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.animation.AnimatorSet;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.PointF;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -44,7 +42,7 @@ public class MainActivity extends Activity {
     private int hGap = 0;
     public static int buttonCellWidth = 0;
     public static int buttonCellHeight = 0;
-    public static int ver=11;
+    public static int ver = 11;
     private int groupVGapDip = 60;
     private int groupVGap = 0;
     private Point selectedButtonsVertex = new Point(0, 0);
@@ -213,7 +211,7 @@ public class MainActivity extends Activity {
         int[] location = {
                 0, 0
         };
-         board.getLocationOnScreen(location);
+        board.getLocationOnScreen(location);
         currentButton.setXX(dx - location[0]);
         currentButton.setYY(dy - location[1]);
         getCurrentXone();
@@ -720,6 +718,68 @@ public class MainActivity extends Activity {
         selectedButtonsVertex = new Point(0, 0);
         unselectedButtonsVertex = new Point(0, selectedButtonsTotalHeight
                 + groupVGap);
+    }
+
+    private void finalCheck() {
+        // 终极检查
+        //TODO
+        //检查时要保证目前没有按钮在被拖动
+        if (currentButton==null) {
+            LayoutParams params = new LayoutParams(-1, groupVGap);
+            params.topMargin = selectedButtonsTotalHeight;
+            middleView.setLayoutParams(params);
+
+            ButtonComparator comparator = new ButtonComparator();
+            Collections.sort(selectedButtons, comparator);
+            for (int i = 0; i < selectedButtons.size(); i++) {
+                MovableButton button = selectedButtons.get(i);
+
+                Point point = new Point();
+                point.x = i % Colums;
+                point.y = i / Colums;
+                button.setPosition(point);
+                button.setTargetPosition(new Point(point.x, point.y));
+
+                LayoutParams params1 = new LayoutParams(buttonWidth, buttonHeight);
+                params1.leftMargin = point.x * buttonCellWidth;
+                params1.topMargin = point.y * buttonCellHeight;
+                button.setLayoutParams(params1);
+            }
+
+            Collections.sort(unselectedButtons, comparator);
+            for (int i = 0; i < unselectedButtons.size(); i++) {
+                MovableButton button = unselectedButtons.get(i);
+
+                Point point = new Point();
+                point.x = i % Colums;
+                point.y = i / Colums;
+                button.setPosition(point);
+                button.setTargetPosition(new Point(point.x, point.y));
+
+                LayoutParams params1 = new LayoutParams(buttonWidth, buttonHeight);
+                params1.leftMargin = point.x * buttonCellWidth;
+                params1.topMargin = unselectedButtonsVertex.y + point.y
+                        * buttonCellHeight;
+                button.setLayoutParams(params1);
+            }
+        }
+    }
+
+    public class ButtonComparator implements Comparator<MovableButton> {
+
+        @Override
+        public int compare(MovableButton lhs, MovableButton rhs) {
+            int com = lhs.getIndex() - rhs.getIndex();
+            if (com > 0) {
+                return 1;
+            } else if (com == 0) {
+                return 0;
+            } else {
+                return -1;
+            }
+
+        }
+
     }
 
     private void slog(String string) {

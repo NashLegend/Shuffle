@@ -1,6 +1,8 @@
 
 package com.example.shuffle;
 
+import java.util.Comparator;
+
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
@@ -55,6 +57,10 @@ public class MovableButton extends Button {
         }
     }
 
+    public int getIndex() {
+        return position.y * MainActivity.Colums + position.x;
+    }
+
     public void startAnimator(Point anchorPoint) {
         if (Build.VERSION.SDK_INT < ver) {
             LayoutParams params = (LayoutParams) getLayoutParams();
@@ -73,7 +79,6 @@ public class MovableButton extends Button {
             ((ObjectAnimator) animator).setDuration(300);
             ((ObjectAnimator) animator).start();
         }
-
     }
 
     public void setXX(float x) {
@@ -144,5 +149,7 @@ public class MovableButton extends Button {
     public void setSelected(boolean selected) {
         this.selected = selected;
     }
+
+    
 
 }
