@@ -21,7 +21,6 @@ public class MovableButton extends Button {
     private Point position = new Point(0, 0);
     private Point targetPosition = new Point(0, 0);
     private Object animator;
-    private int ver = 11;
 
     public Point getTargetPosition() {
         return targetPosition;
@@ -38,7 +37,7 @@ public class MovableButton extends Button {
     }
 
     public void setTargetPositionIsNext() {
-        if (targetPosition.x < (MainActivity.Colums - 1)) {
+        if (targetPosition.x < (ShuffleBoard.Colums - 1)) {
             targetPosition.x++;
         } else {
             targetPosition.x = 0;
@@ -48,7 +47,7 @@ public class MovableButton extends Button {
 
     public void setTargetPositionIsPrev() {
         if (targetPosition.x == 0 && targetPosition.y > 0) {
-            targetPosition.x = MainActivity.Colums - 1;
+            targetPosition.x = ShuffleBoard.Colums - 1;
             targetPosition.y--;
         } else if (targetPosition.x > 0) {
             targetPosition.x--;
@@ -56,23 +55,23 @@ public class MovableButton extends Button {
     }
 
     public int getIndex() {
-        return position.y * MainActivity.Colums + position.x;
+        return position.y * ShuffleBoard.Colums + position.x;
     }
 
     public void startAnimator(Point anchorPoint) {
-        if (Build.VERSION.SDK_INT < ver) {
+        if (Build.VERSION.SDK_INT < ShuffleBoard.animateVersion) {
             LayoutParams params = (LayoutParams) getLayoutParams();
-            params.leftMargin = MainActivity.buttonCellWidth * targetPosition.x;
-            params.topMargin = MainActivity.buttonCellHeight * targetPosition.y + anchorPoint.y;
+            params.leftMargin = ShuffleBoard.buttonCellWidth * targetPosition.x;
+            params.topMargin = ShuffleBoard.buttonCellHeight * targetPosition.y + anchorPoint.y;
             setLayoutParams(params);
         } else {
             if (animator != null && ((ValueAnimator) animator).isRunning()) {
                 ((ValueAnimator) animator).cancel();
             }
             PropertyValuesHolder holderx = PropertyValuesHolder.ofFloat("x", getX(),
-                    MainActivity.buttonCellWidth * targetPosition.x);
+                    ShuffleBoard.buttonCellWidth * targetPosition.x);
             PropertyValuesHolder holdery = PropertyValuesHolder.ofFloat("y", getY(),
-                    MainActivity.buttonCellHeight * targetPosition.y + anchorPoint.y);
+                    ShuffleBoard.buttonCellHeight * targetPosition.y + anchorPoint.y);
             animator = ObjectAnimator.ofPropertyValuesHolder(this, holderx, holdery);
             ((ObjectAnimator) animator).setDuration(300);
             ((ObjectAnimator) animator).start();
@@ -80,7 +79,7 @@ public class MovableButton extends Button {
     }
 
     public void setXX(float x) {
-        if (Build.VERSION.SDK_INT < ver) {
+        if (Build.VERSION.SDK_INT < ShuffleBoard.animateVersion) {
             LayoutParams params = (LayoutParams) getLayoutParams();
             params.leftMargin = (int) x;
             setLayoutParams(params);
@@ -90,7 +89,7 @@ public class MovableButton extends Button {
     }
 
     public void setYY(float y) {
-        if (Build.VERSION.SDK_INT < ver) {
+        if (Build.VERSION.SDK_INT < ShuffleBoard.animateVersion) {
             LayoutParams params = (LayoutParams) getLayoutParams();
             params.topMargin = (int) y;
             setLayoutParams(params);
@@ -100,7 +99,7 @@ public class MovableButton extends Button {
     }
 
     public float getXX() {
-        if (Build.VERSION.SDK_INT < ver) {
+        if (Build.VERSION.SDK_INT < ShuffleBoard.animateVersion) {
             return this.getLeft();
         } else {
             return super.getX();
@@ -108,7 +107,7 @@ public class MovableButton extends Button {
     }
 
     public float getYY() {
-        if (Build.VERSION.SDK_INT < ver) {
+        if (Build.VERSION.SDK_INT < ShuffleBoard.animateVersion) {
             return this.getTop();
         } else {
             return super.getY();

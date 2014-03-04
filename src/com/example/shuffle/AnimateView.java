@@ -11,16 +11,15 @@ import android.view.View;
 import android.widget.RelativeLayout.LayoutParams;
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-public class animateView extends View {
+public class AnimateView extends View {
     private Object animator;
-    private int ver = 11;
 
-    public animateView(Context context) {
+    public AnimateView(Context context) {
         super(context);
     }
 
     public void startAnimator(float dy) {
-        if (Build.VERSION.SDK_INT < ver) {
+        if (Build.VERSION.SDK_INT < ShuffleBoard.animateVersion) {
             LayoutParams params = (LayoutParams) getLayoutParams();
             params.topMargin = (int) dy;
             setLayoutParams(params);
@@ -36,7 +35,7 @@ public class animateView extends View {
     }
     
     public void setYY(float y) {
-        if (Build.VERSION.SDK_INT < ver) {
+        if (Build.VERSION.SDK_INT < ShuffleBoard.animateVersion) {
             LayoutParams params = (LayoutParams) getLayoutParams();
             params.topMargin = (int) y;
             setLayoutParams(params);
