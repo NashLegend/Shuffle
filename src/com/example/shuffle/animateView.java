@@ -34,4 +34,14 @@ public class animateView extends View {
             ((ObjectAnimator) animator).start();
         }
     }
+    
+    public void setYY(float y) {
+        if (Build.VERSION.SDK_INT < ver) {
+            LayoutParams params = (LayoutParams) getLayoutParams();
+            params.topMargin = (int) y;
+            setLayoutParams(params);
+        } else {
+            super.setY(y);
+        }
+    }
 }

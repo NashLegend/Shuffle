@@ -1,8 +1,6 @@
 
 package com.example.shuffle;
 
-import java.util.Comparator;
-
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
