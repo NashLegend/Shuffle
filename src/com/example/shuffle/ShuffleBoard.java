@@ -139,6 +139,9 @@ public class ShuffleBoard extends RelativeLayout {
         private float ddx = 0f;
         private float ddy = 0f;
         private boolean moved = false;
+        private float startX = 0f;
+        private float startY = 0f;
+        private float span = dip2px(5, getContext());
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
@@ -154,23 +157,25 @@ public class ShuffleBoard extends RelativeLayout {
                             } else {
                                 lastZone = UNSELECTED_ZONE;
                             }
+                            startX = event.getRawX();
+                            startY = event.getRawY();
                             lastRow = currentButton.getPosition().y;
                             lastCol = currentButton.getPosition().x;
                             slog("down: " + lastZone + "_" + lastRow + "_"
                                     + lastCol);
                             slog("the First real pos is " + currentButton.getXX()
                                     + "," + currentButton.getYY());
-                            lastX = event.getRawX();
-                            lastY = event.getRawY();
+                            lastX = startX;
+                            lastY = startY;
                             ddx = event.getX();
                             ddy = event.getY();
                         }
                         break;
                     case MotionEvent.ACTION_MOVE:
-                        moved = true;
                         float dx = event.getRawX() - lastX;
                         float dy = event.getRawY() - lastY;
                         if (dx * dx + dy * dy > 9) {
+                            moved = true;
                             lastX = event.getRawX();
                             lastY = event.getRawY();
                             moveButton(event.getRawX() - ddx, event.getRawY() - ddy);
