@@ -10,6 +10,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -47,6 +48,8 @@ public class ShuffleBoard extends RelativeLayout {
     private static final int SELECTED_ZONE = 0;
     private static final int MIDDLE_ZONE = 1;
     private static final int UNSELECTED_ZONE = 2;
+
+    private int finalCheckInt = 1000;
 
     private MovableButton currentButton;
 
@@ -183,7 +186,14 @@ public class ShuffleBoard extends RelativeLayout {
                         } else {
                             flipAcross();
                         }
-                        // finalCheck();
+                        new Handler().postDelayed(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                // TODO 自动生成的方法存根
+                                finalCheck();
+                            }
+                        }, finalCheckInt);
                         break;
                     default:
                         break;
