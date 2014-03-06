@@ -16,6 +16,9 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+/**
+ * @author NashLegend 建立在不超过一屏的基础上
+ */
 public class ShuffleBoard extends RelativeLayout {
 	private ArrayList<MovableButton> selectedButtons = new ArrayList<MovableButton>();
 	private ArrayList<MovableButton> unselectedButtons = new ArrayList<MovableButton>();
@@ -55,6 +58,9 @@ public class ShuffleBoard extends RelativeLayout {
 	private MovableButton currentButton;
 
 	private int selectMarginTop = 100;
+
+	private static int minButtons = 4;
+	private static int maxButtons = 24;
 
 	public ShuffleBoard(Context context) {
 		super(context);
@@ -132,7 +138,7 @@ public class ShuffleBoard extends RelativeLayout {
 			button.setOnTouchListener(listener);
 		}
 
-		for (int i = 16; i < 31; i++) {
+		for (int i = 16; i < 33; i++) {
 			MovableButton button = new MovableButton(getContext());
 			button.setTitle("btn_" + i);
 			button.setId(i);
@@ -703,10 +709,12 @@ public class ShuffleBoard extends RelativeLayout {
 		if (ani) {
 			if (len % Colums == 1 && fromZone != SELECTED_ZONE
 					&& shouldExpand()) {
+				slog("expand");
 				expand();
 				aniSec = false;
 			} else if (len % Colums == 0 && fromZone == SELECTED_ZONE
 					&& shouldShrink()) {
+				slog("shrink");
 				shrink();
 				aniSec = false;
 			}
@@ -752,10 +760,12 @@ public class ShuffleBoard extends RelativeLayout {
 				if (len % Colums == 1 && fromZone != UNSELECTED_ZONE
 						&& shouldShrink2()) {
 					// UNSELECTED_ZONE expand == SELECTED_ZONE shrink
+					slog("shrink2");
 					shrink();
 				} else if (len % Colums == 0 && fromZone == UNSELECTED_ZONE
 						&& shouldExpand2()) {
 					// UNSELECTED_ZONE shrink == SELECTED_ZONE expand
+					slog("expand2");
 					expand();
 				}
 			}
@@ -820,7 +830,7 @@ public class ShuffleBoard extends RelativeLayout {
 			if (buttonCellHeight * (selectedButtons.size() - 1) / Colums >= minSelectedZoneHeight) {
 				return true;
 			} else {
-				if ((int) (Math.ceil((unselectedButtons.size() + 1) / Colums))
+				if ((int) (Math.ceil(((double)unselectedButtons.size() + 1) / Colums))
 						* buttonCellHeight + groupVGap
 						+ selectedButtonsVertex.y + selectedButtonsTotalHeight > getHeight()) {
 					return true;
@@ -832,9 +842,9 @@ public class ShuffleBoard extends RelativeLayout {
 			if (buttonCellHeight * selectedButtons.size() / Colums >= minSelectedZoneHeight) {
 				return true;
 			} else {
-				if ((int) (Math.ceil(unselectedButtons.size() / Colums))
+				if ((int) (Math.ceil((double)unselectedButtons.size() / Colums))
 						* buttonCellHeight + groupVGap
-						+ selectedButtonsVertex.y + minSelectedZoneHeight > getHeight()) {
+						+ selectedButtonsVertex.y + selectedButtonsTotalHeight > getHeight()) {
 					return true;
 				} else {
 					return false;
