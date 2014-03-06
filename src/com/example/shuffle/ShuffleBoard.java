@@ -49,9 +49,13 @@ public class ShuffleBoard extends RelativeLayout {
     private static final int MIDDLE_ZONE = 1;
     private static final int UNSELECTED_ZONE = 2;
 
-    private int finalCheckInt = 1000;
+    private int finalCheckInt = 500;
+
+    private int minSelectedZoneHeight = 0;
 
     private MovableButton currentButton;
+
+    private int selectMarginTop = 100;
 
     public ShuffleBoard(Context context) {
         super(context);
@@ -85,27 +89,32 @@ public class ShuffleBoard extends RelativeLayout {
         selectedButtonsTotalHeight = selectedButtonsRows * buttonCellHeight;
 
         int totHeight = unselectedButtonsTotalHeight
-                + selectedButtonsTotalHeight + groupVGap;
+                + selectedButtonsTotalHeight + groupVGap + selectedButtonsVertex.y;
+        Log.i("shuffle", getHeight() + "");
         if (totHeight > this.getHeight()) {
+            //TODO
             Toast.makeText(getContext(),
                     "Sell your phone and go buy a bigger one please !",
                     Toast.LENGTH_SHORT).show();
-            android.view.ViewGroup.LayoutParams params = this
-                    .getLayoutParams();
-            params.height = totHeight;
-            this.setLayoutParams(params);
+//            android.view.ViewGroup.LayoutParams params = this
+//                    .getLayoutParams();
+//            params.height = totHeight;
+//            this.setLayoutParams(params);
         }
 
-        selectedButtonsVertex = new Point(0, 0);
-        unselectedButtonsVertex = new Point(0, selectedButtonsTotalHeight
+        selectedButtonsVertex = new Point(0, selectMarginTop);
+        unselectedButtonsVertex = new Point(0, selectedButtonsVertex.y + selectedButtonsTotalHeight
                 + groupVGap);
+        minSelectedZoneHeight = (int) Math.ceil(((this.getHeight() * 0.4) / buttonCellHeight))
+                * buttonCellHeight;
 
+        updateStructureData();
     }
 
     private void initView() {
         middleView = new AnimateView(getContext());
         LayoutParams params = new LayoutParams(-1, groupVGap);
-        params.topMargin = selectedButtonsTotalHeight;
+        params.topMargin = selectedButtonsTotalHeight + selectedButtonsVertex.y;
         middleView.setLayoutParams(params);
         middleView.setBackgroundColor(Color.parseColor("#00ffff"));
         this.addView(middleView);
@@ -122,7 +131,7 @@ public class ShuffleBoard extends RelativeLayout {
             button.setOnTouchListener(listener);
         }
 
-        for (int i = 15; i < 28; i++) {
+        for (int i = 16; i < 31; i++) {
             MovableButton button = new MovableButton(getContext());
             button.setTitle("btn_" + i);
             button.setId(i);
@@ -231,8 +240,8 @@ public class ShuffleBoard extends RelativeLayout {
             Point point = new Point(unselectedButtons.size() % Colums, unselectedButtons.size()
                     / Colums);
             currentButton.setTargetPosition(point);
-            checkZone(UNSELECTED_ZONE, SELECTED_ZONE);
             currentButton.startAnimator(unselectedButtonsVertex);
+            checkZone(UNSELECTED_ZONE, SELECTED_ZONE);
             currentButton.setSelected(false);
             selectedButtons.remove(currentButton);
             unselectedButtons.add(currentButton);
@@ -244,8 +253,8 @@ public class ShuffleBoard extends RelativeLayout {
             Point point = new Point(selectedButtons.size() % Colums, selectedButtons.size()
                     / Colums);
             currentButton.setTargetPosition(point);
-            checkZone(SELECTED_ZONE, UNSELECTED_ZONE);
             currentButton.startAnimator(selectedButtonsVertex);
+            checkZone(SELECTED_ZONE, UNSELECTED_ZONE);
             currentButton.setSelected(true);
             unselectedButtons.remove(currentButton);
             selectedButtons.add(currentButton);
@@ -305,7 +314,7 @@ public class ShuffleBoard extends RelativeLayout {
             crtZone = SELECTED_ZONE;
             aniZone = crtZone;
             crtCol = (int) (pointF.x / buttonCellWidth);
-            crtRow = (int) (pointF.y / buttonCellHeight);
+            crtRow = (int) (pointF.y - selectedButtonsVertex.y / buttonCellHeight);
             if (crtRow < 0) {
                 crtRow = 0;
             }
@@ -337,7 +346,6 @@ public class ShuffleBoard extends RelativeLayout {
         lastZone = crtZone;
         lastRow = crtRow;
         lastCol = crtCol;
-        // slog("imng: " + lastZone + "_" + lastRow + "_" + lastCol);
     }
 
     private void setupAnimator(int zone, ArrayList<MovableButton> buttons) {
@@ -561,7 +569,7 @@ public class ShuffleBoard extends RelativeLayout {
             crtZone = SELECTED_ZONE;
             aniZone = crtZone;
             crtCol = (int) (pointF.x / buttonCellWidth);
-            crtRow = (int) (pointF.y / buttonCellHeight);
+            crtRow = (int) (pointF.y - selectedButtonsVertex.y / buttonCellHeight);
             if (crtRow < 0) {
                 crtRow = 0;
             }
@@ -630,7 +638,7 @@ public class ShuffleBoard extends RelativeLayout {
 
             LayoutParams params = new LayoutParams(buttonWidth, buttonHeight);
             params.leftMargin = point.x * buttonCellWidth;
-            params.topMargin = point.y * buttonCellHeight;
+            params.topMargin = selectedButtonsVertex.y + point.y * buttonCellHeight;
             button.setLayoutParams(params);
             this.addView(button);
         }
@@ -704,35 +712,116 @@ public class ShuffleBoard extends RelativeLayout {
     }
 
     private void expand() {
-        selectedButtonsVertex = new Point(0, 0);
-        unselectedButtonsVertex = new Point(0, selectedButtonsTotalHeight
-                + groupVGap + buttonCellHeight);
-        selectedButtonsTotalHeight += buttonCellHeight;
-        ArrayList<MovableButton> tmpList = new ArrayList<MovableButton>();
-        for (MovableButton movableButton : unselectedButtons) {
-            if (movableButton == currentButton) {
-                continue;
+        // TODO
+        if (shouldExpand()) {
+            selectedButtonsVertex = new Point(0, selectMarginTop);
+            selectedButtonsTotalHeight += buttonCellHeight;
+            unselectedButtonsVertex = new Point(0, selectedButtonsVertex.y
+                    + selectedButtonsTotalHeight
+                    + groupVGap);
+            ArrayList<MovableButton> tmpList = new ArrayList<MovableButton>();
+            for (MovableButton movableButton : unselectedButtons) {
+                if (movableButton == currentButton) {
+                    continue;
+                }
+                tmpList.add(movableButton);
             }
-            tmpList.add(movableButton);
+            middleView.startAnimator(selectedButtonsVertex.y + selectedButtonsTotalHeight);
+            setupAnimator(UNSELECTED_ZONE, tmpList);
         }
-        middleView.startAnimator(selectedButtonsTotalHeight);
-        setupAnimator(UNSELECTED_ZONE, tmpList);
+    }
+
+    private boolean shouldExpand() {
+        // 外界进入SelectedZone
+        // return true;
+        if (currentButton.isSelected()) {
+            if (buttonCellHeight * (selectedButtons.size() - 1) / Colums < selectedButtonsTotalHeight) {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            if (buttonCellHeight * (selectedButtons.size() + 1) / Colums >= selectedButtonsTotalHeight) {
+                return true;
+            } else {
+                return false;
+            }
+        }
     }
 
     private void shrink() {
-        selectedButtonsVertex = new Point(0, 0);
-        unselectedButtonsVertex = new Point(0, selectedButtonsTotalHeight
-                + groupVGap - buttonCellHeight);
-        selectedButtonsTotalHeight -= buttonCellHeight;
-        ArrayList<MovableButton> tmpList = new ArrayList<MovableButton>();
-        for (MovableButton movableButton : unselectedButtons) {
-            if (movableButton == currentButton) {
-                continue;
+        // TODO
+        if (shouldShrink()) {
+            selectedButtonsVertex = new Point(0, selectMarginTop);
+            selectedButtonsTotalHeight -= buttonCellHeight;
+            unselectedButtonsVertex = new Point(0, selectedButtonsVertex.y
+                    + selectedButtonsTotalHeight
+                    + groupVGap);
+            ArrayList<MovableButton> tmpList = new ArrayList<MovableButton>();
+            for (MovableButton movableButton : unselectedButtons) {
+                if (movableButton == currentButton) {
+                    continue;
+                }
+                tmpList.add(movableButton);
             }
-            tmpList.add(movableButton);
+            middleView.startAnimator(selectedButtonsVertex.y + selectedButtonsTotalHeight);
+            setupAnimator(UNSELECTED_ZONE, tmpList);
         }
-        middleView.startAnimator(selectedButtonsTotalHeight);
-        setupAnimator(UNSELECTED_ZONE, tmpList);
+    }
+
+    private boolean shouldShrink() {
+        // return true;
+        if (currentButton.isSelected()) {
+            if (buttonCellHeight * (selectedButtons.size() - 1) / Colums >= minSelectedZoneHeight) {
+                return true;
+            } else {
+                Log.i("shuffle", (int) (Math.ceil((unselectedButtons.size() + 1) / Colums))
+                        * buttonCellHeight
+                        + groupVGap + selectedButtonsVertex.y
+                        + selectedButtonsTotalHeight + "  " + getHeight());
+                if ((int) (Math.ceil((unselectedButtons.size() + 1) / Colums)) * buttonCellHeight
+                        + groupVGap + selectedButtonsVertex.y
+                        + minSelectedZoneHeight > getHeight()) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        } else {
+            if (buttonCellHeight * selectedButtons.size() / Colums >= minSelectedZoneHeight) {
+                return true;
+            } else {
+                if ((int) (Math.ceil(unselectedButtons.size() / Colums)) * buttonCellHeight
+                        + groupVGap + selectedButtonsVertex.y
+                        + minSelectedZoneHeight > getHeight()) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
+    }
+
+    /**
+     * 建立在不可能超过一屏的假设上
+     */
+    private void updateStructureData() {
+        if (selectedButtonsTotalHeight <= minSelectedZoneHeight) {
+            if (unselectedButtonsTotalHeight + groupVGap + minSelectedZoneHeight
+                    + selectedButtonsVertex.y > this.getHeight()) {
+                // 使用minSelectedZoneHeight会溢出，则减小
+                // TODO 存疑
+                selectedButtonsTotalHeight = buttonCellHeight
+                        * (this.getHeight() - unselectedButtonsTotalHeight
+                                - groupVGap - selectedButtonsVertex.y) / buttonCellHeight;
+                unselectedButtonsVertex.y = selectedButtonsVertex.y + selectedButtonsTotalHeight
+                        + groupVGap;
+            } else {
+                selectedButtonsTotalHeight = minSelectedZoneHeight;
+                unselectedButtonsVertex.y = selectedButtonsVertex.y + selectedButtonsTotalHeight
+                        + groupVGap;
+            }
+        }
     }
 
     private void remeasure() {
@@ -746,20 +835,21 @@ public class ShuffleBoard extends RelativeLayout {
         selectedButtonsTotalHeight = selectedButtonsRows * buttonCellHeight;
 
         int totHeight = unselectedButtonsTotalHeight
-                + selectedButtonsTotalHeight + groupVGap;
+                + selectedButtonsTotalHeight + groupVGap + selectedButtonsVertex.y;
         if (totHeight > this.getHeight()) {
             Toast.makeText(getContext(),
                     "Sell your phone and go buy a bigger one please !",
                     Toast.LENGTH_SHORT).show();
-            android.view.ViewGroup.LayoutParams params = this
-                    .getLayoutParams();
-            params.height = totHeight;
-            this.setLayoutParams(params);
+//            android.view.ViewGroup.LayoutParams params = this
+//                    .getLayoutParams();
+//            params.height = totHeight;
+//            this.setLayoutParams(params);
         }
 
-        selectedButtonsVertex = new Point(0, 0);
-        unselectedButtonsVertex = new Point(0, selectedButtonsTotalHeight
+        selectedButtonsVertex = new Point(0, selectMarginTop);
+        unselectedButtonsVertex = new Point(0, selectedButtonsVertex.y + selectedButtonsTotalHeight
                 + groupVGap);
+        updateStructureData();
     }
 
     private void finalCheck() {
@@ -767,7 +857,9 @@ public class ShuffleBoard extends RelativeLayout {
         // TODO
         // 检查时要保证目前没有按钮在被拖动
         if (currentButton == null) {
-            middleView.setYY(selectedButtonsTotalHeight);
+            // updateStructureData();
+
+            middleView.setYY(selectedButtonsTotalHeight + selectedButtonsVertex.y);
 
             ButtonComparator comparator = new ButtonComparator();
             Collections.sort(selectedButtons, comparator);
@@ -780,7 +872,7 @@ public class ShuffleBoard extends RelativeLayout {
                 button.setPosition(point);
                 button.setTargetPosition(new Point(point.x, point.y));
                 button.setXX(point.x * buttonCellWidth);
-                button.setYY(point.y * buttonCellHeight);
+                button.setYY(selectedButtonsVertex.y + point.y * buttonCellHeight);
             }
 
             Collections.sort(unselectedButtons, comparator);
@@ -798,6 +890,10 @@ public class ShuffleBoard extends RelativeLayout {
                         * buttonCellHeight);
             }
         }
+    }
+
+    public void commitChange() {
+
     }
 
     public class ButtonComparator implements Comparator<MovableButton> {
