@@ -230,22 +230,11 @@ public class ShuffleBoard extends RelativeLayout {
 					SELECTED_ZONE, currentButton.getPosition().y,
 					currentButton.getPosition().x, false);
 			setupAnimator(SELECTED_ZONE, tmpButtons);
-
-			// TODO
 			Point point = new Point(unselectedButtons.size() % Colums,
 					unselectedButtons.size() / Colums);
 			currentButton.setTargetPosition(point);
-			if (unselectedButtons.size() % Colums == 0
-					&& (unselectedButtonsVertex.y + buttonCellHeight
-							* unselectedButtons.size() / Colums + buttonCellHeight) > getHeight()) {
-				currentButton.startAnimator(new Point(
-						unselectedButtonsVertex.x, unselectedButtonsVertex.y
-								- buttonCellHeight));
-			} else {
-				currentButton.startAnimator(unselectedButtonsVertex);
-			}
-
 			checkZone(UNSELECTED_ZONE, SELECTED_ZONE);
+			currentButton.startAnimator(unselectedButtonsVertex);
 			currentButton.setSelected(false);
 			selectedButtons.remove(currentButton);
 			unselectedButtons.add(currentButton);
@@ -257,8 +246,8 @@ public class ShuffleBoard extends RelativeLayout {
 			Point point = new Point(selectedButtons.size() % Colums,
 					selectedButtons.size() / Colums);
 			currentButton.setTargetPosition(point);
-			currentButton.startAnimator(selectedButtonsVertex);
 			checkZone(SELECTED_ZONE, UNSELECTED_ZONE);
+			currentButton.startAnimator(selectedButtonsVertex);
 			currentButton.setSelected(true);
 			unselectedButtons.remove(currentButton);
 			selectedButtons.add(currentButton);
@@ -345,8 +334,8 @@ public class ShuffleBoard extends RelativeLayout {
 						lastRow, lastCol);
 			}
 		}
-		setupAnimator(aniZone, buttons);
 		checkZone(crtZone, lastZone);
+		setupAnimator(aniZone, buttons);
 		currentButton.setTargetPosition(new Point(crtCol, crtRow));
 		lastZone = crtZone;
 		lastRow = crtRow;
