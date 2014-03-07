@@ -33,8 +33,8 @@ public class ShuffleBoard extends RelativeLayout {
     public static int Colums = 4;
     private int vGapDip = 2;// x2
     private int hGapDip = 3;// x2
-    private int vGap = 0;
-    private int hGap = 0;
+    public static int vGap = 0;
+    public static int hGap = 0;
     public static int buttonCellWidth = 0;
     public static int buttonCellHeight = 0;
     public static int animateVersion = 11;
@@ -695,9 +695,9 @@ public class ShuffleBoard extends RelativeLayout {
             button.setTargetPosition(new Point(point.x, point.y));
 
             LayoutParams params = new LayoutParams(buttonWidth, buttonHeight);
-            params.leftMargin = point.x * buttonCellWidth;
+            params.leftMargin = point.x * buttonCellWidth + hGap;
             params.topMargin = selectedButtonsVertex.y + point.y
-                    * buttonCellHeight;
+                    * buttonCellHeight + vGap;
             button.setLayoutParams(params);
             this.addView(button);
         }
@@ -712,9 +712,9 @@ public class ShuffleBoard extends RelativeLayout {
             button.setTargetPosition(new Point(point.x, point.y));
 
             LayoutParams params = new LayoutParams(buttonWidth, buttonHeight);
-            params.leftMargin = point.x * buttonCellWidth;
+            params.leftMargin = point.x * buttonCellWidth + hGap;
             params.topMargin = unselectedButtonsVertex.y + point.y
-                    * buttonCellHeight;
+                    * buttonCellHeight + vGap;
             button.setLayoutParams(params);
             this.addView(button);
         }
@@ -1034,9 +1034,9 @@ public class ShuffleBoard extends RelativeLayout {
                 point.y = i / Colums;
                 button.setPosition(point);
                 button.setTargetPosition(new Point(point.x, point.y));
-                button.setXX(point.x * buttonCellWidth);
+                button.setXX(point.x * buttonCellWidth + hGap);
                 button.setYY(selectedButtonsVertex.y + point.y
-                        * buttonCellHeight);
+                        * buttonCellHeight + vGap);
             }
 
             Collections.sort(unselectedButtons, comparator);
@@ -1049,9 +1049,9 @@ public class ShuffleBoard extends RelativeLayout {
                 button.setPosition(point);
                 button.setTargetPosition(new Point(point.x, point.y));
 
-                button.setXX(point.x * buttonCellWidth);
+                button.setXX(point.x * buttonCellWidth + hGap);
                 button.setYY(unselectedButtonsVertex.y + point.y
-                        * buttonCellHeight);
+                        * buttonCellHeight + vGap);
             }
         }
     }

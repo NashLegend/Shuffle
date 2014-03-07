@@ -6,6 +6,7 @@ import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Build;
 import android.widget.Button;
@@ -34,6 +35,7 @@ public class MovableButton extends Button {
 
     public MovableButton(Context context) {
         super(context);
+//        setBackgroundColor(Color.parseColor("#00ffff"));
     }
 
     public void setTargetPositionIsNext() {
@@ -61,17 +63,19 @@ public class MovableButton extends Button {
     public void startAnimator(Point anchorPoint) {
         if (Build.VERSION.SDK_INT < ShuffleBoard.animateVersion) {
             LayoutParams params = (LayoutParams) getLayoutParams();
-            params.leftMargin = ShuffleBoard.buttonCellWidth * targetPosition.x;
-            params.topMargin = ShuffleBoard.buttonCellHeight * targetPosition.y + anchorPoint.y;
+            params.leftMargin = ShuffleBoard.buttonCellWidth * targetPosition.x + ShuffleBoard.hGap;
+            params.topMargin = ShuffleBoard.buttonCellHeight * targetPosition.y + anchorPoint.y
+                    + ShuffleBoard.vGap;
             setLayoutParams(params);
         } else {
             if (animator != null && ((ValueAnimator) animator).isRunning()) {
                 ((ValueAnimator) animator).cancel();
             }
             PropertyValuesHolder holderx = PropertyValuesHolder.ofFloat("x", getX(),
-                    ShuffleBoard.buttonCellWidth * targetPosition.x);
+                    ShuffleBoard.buttonCellWidth * targetPosition.x + ShuffleBoard.hGap);
             PropertyValuesHolder holdery = PropertyValuesHolder.ofFloat("y", getY(),
-                    ShuffleBoard.buttonCellHeight * targetPosition.y + anchorPoint.y);
+                    ShuffleBoard.buttonCellHeight * targetPosition.y + anchorPoint.y
+                            + ShuffleBoard.vGap);
             animator = ObjectAnimator.ofPropertyValuesHolder(this, holderx, holdery);
             ((ObjectAnimator) animator).setDuration(300);
             ((ObjectAnimator) animator).start();
@@ -146,7 +150,5 @@ public class MovableButton extends Button {
     public void setSelected(boolean selected) {
         this.selected = selected;
     }
-
-    
 
 }
