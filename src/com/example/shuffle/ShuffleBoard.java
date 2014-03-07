@@ -901,7 +901,12 @@ public class ShuffleBoard extends RelativeLayout {
                 if ((int) (Math.ceil((double) unselectedButtons.size() / Colums))
                         * buttonCellHeight + groupVGap
                         + selectedButtonsVertex.y + selectedButtonsTotalHeight > getHeight()) {
-                    return true;
+                    if (Math.ceil((double) (selectedButtons.size()) / Colums) * buttonCellHeight > (selectedButtonsTotalHeight - buttonCellHeight)) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+
                 } else {
                     return false;
                 }
@@ -935,7 +940,11 @@ public class ShuffleBoard extends RelativeLayout {
         if (currentButton.isSelected()) {
             if (unselectedButtonsVertex.y + buttonCellHeight
                     * unselectedButtons.size() / Colums + buttonCellHeight > getHeight()) {
-                return true;
+                if (Math.ceil((double) (selectedButtons.size() - 1) / Colums) * buttonCellHeight > (selectedButtonsTotalHeight - buttonCellHeight)) {
+                    return false;
+                } else {
+                    return true;
+                }
             } else {
                 return false;
             }
@@ -943,7 +952,11 @@ public class ShuffleBoard extends RelativeLayout {
             if (unselectedButtonsVertex.y + buttonCellHeight
                     * (unselectedButtons.size() - 1) / Colums
                     + buttonCellHeight > getHeight()) {
-                return true;
+                if (Math.ceil((double) (selectedButtons.size()) / Colums) * buttonCellHeight > (selectedButtonsTotalHeight - buttonCellHeight)) {
+                    return false;
+                } else {
+                    return true;
+                }
             } else {
                 return false;
             }
@@ -999,14 +1012,20 @@ public class ShuffleBoard extends RelativeLayout {
         int totHeight = unselectedButtonsTotalHeight
                 + selectedButtonsTotalHeight + groupVGap
                 + selectedButtonsVertex.y;
+        // 挤满也放不下一屏幕了
         if (totHeight > this.getHeight()) {
             showToast(getContext(),
                     "Sell your phone and go buy a bigger one please !",
                     Toast.LENGTH_SHORT);
-            // android.view.ViewGroup.LayoutParams params = this
-            // .getLayoutParams();
-            // params.height = totHeight;
-            // this.setLayoutParams(params);
+            android.view.ViewGroup.LayoutParams params = this
+                    .getLayoutParams();
+            params.height = totHeight;
+            this.setLayoutParams(params);
+        } else {
+            android.view.ViewGroup.LayoutParams params = this
+                    .getLayoutParams();
+            params.height = -1;
+            this.setLayoutParams(params);
         }
 
         selectedButtonsVertex = new Point(0, selectMarginTop);
