@@ -104,7 +104,6 @@ public class ShuffleBoard extends RelativeLayout {
         int totHeight = unselectedButtonsTotalHeight
                 + selectedButtonsTotalHeight + groupVGap
                 + selectedButtonsVertex.y;
-        Log.i("shuffle", getHeight() + "");
         if (totHeight > this.getHeight()) {
             // TODO
             showToast(getContext(),
@@ -141,7 +140,7 @@ public class ShuffleBoard extends RelativeLayout {
     }
 
     private void getButtons() {
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < 12; i++) {
             MovableButton button = new MovableButton(getContext());
             button.setTitle("btn_" + i);
             button.setId(i);
@@ -150,7 +149,7 @@ public class ShuffleBoard extends RelativeLayout {
             button.setOnTouchListener(listener);
         }
 
-        for (int i = 16; i < 33; i++) {
+        for (int i = 20; i < 53; i++) {
             MovableButton button = new MovableButton(getContext());
             button.setTitle("btn_" + i);
             button.setId(i);
@@ -278,7 +277,6 @@ public class ShuffleBoard extends RelativeLayout {
                 currentButton.setSelected(true);
                 unselectedButtons.remove(currentButton);
                 selectedButtons.add(currentButton);
-
                 setFinalPosition();
             } else {
                 showToast(getContext(), "不能再多了", Toast.LENGTH_SHORT);
@@ -337,7 +335,12 @@ public class ShuffleBoard extends RelativeLayout {
             crtRow = lastRow;
             crtCol = lastCol;
             // slog("from Middle_After" + currentButton.getTexst());
-            buttons = getAnimatedButtonsAfter(lastZone, lastRow, lastCol, false);
+            if ((!currentButton.isSelected()) && (lastZone == SELECTED_ZONE)
+                    && (selectedButtons.size() == maxButtons)) {
+                // slog("do nothing");
+            } else {
+                buttons = getAnimatedButtonsAfter(lastZone, lastRow, lastCol, false);
+            }
             checkZone(crtZone, lastZone);
         } else {
             crtZone = SELECTED_ZONE;
@@ -770,7 +773,7 @@ public class ShuffleBoard extends RelativeLayout {
                 aniSec = false;
             } else if (len % Colums == 0 && fromZone == SELECTED_ZONE
                     && shouldShrink()) {
-                // slog("shrink");
+                slog("shrink");
                 shrink();
                 aniSec = false;
             }
@@ -816,7 +819,7 @@ public class ShuffleBoard extends RelativeLayout {
                 if (len % Colums == 1 && fromZone != UNSELECTED_ZONE
                         && shouldShrink2()) {
                     // UNSELECTED_ZONE expand == SELECTED_ZONE shrink
-                    // slog("shrink2");
+                    slog("shrink2");
                     shrink();
                 } else if (len % Colums == 0 && fromZone == UNSELECTED_ZONE
                         && shouldExpand2()) {
@@ -889,6 +892,7 @@ public class ShuffleBoard extends RelativeLayout {
                 if ((int) (Math.ceil(((double) unselectedButtons.size() + 1) / Colums))
                         * buttonCellHeight + groupVGap
                         + selectedButtonsVertex.y + selectedButtonsTotalHeight > getHeight()) {
+                    slog("22222");
                     return true;
                 } else {
                     return false;
@@ -896,7 +900,12 @@ public class ShuffleBoard extends RelativeLayout {
             }
         } else {
             if (buttonCellHeight * selectedButtons.size() / Colums >= minSelectedZoneHeight) {
-                return true;
+                slog("444");
+                if (selectedButtons.size() < maxButtons) {
+                    return true;
+                } else {
+                    return false;
+                }
             } else {
                 if ((int) (Math.ceil((double) unselectedButtons.size() / Colums))
                         * buttonCellHeight + groupVGap
@@ -971,31 +980,25 @@ public class ShuffleBoard extends RelativeLayout {
             if (unselectedButtonsTotalHeight + groupVGap
                     + minSelectedZoneHeight + selectedButtonsVertex.y > this
                         .getHeight()) {
-                slog("more than and less");
                 int tb = buttonCellHeight
                         * ((this.getHeight() - unselectedButtonsTotalHeight
                                 - groupVGap - selectedButtonsVertex.y) / buttonCellHeight);
                 if (Math.ceil((double) (selectedButtons.size()) / Colums) * buttonCellHeight > tb) {
                     // 屏幕太小会挤在一块
-                    slog("too small");
                     selectedButtonsTotalHeight = (int) (Math.ceil((double) (selectedButtons.size())
                             / Colums)
                             * buttonCellHeight);
                 } else {
-                    slog("ok fit");
                     selectedButtonsTotalHeight = tb;
                 }
                 unselectedButtonsVertex.y = selectedButtonsVertex.y
                         + selectedButtonsTotalHeight + groupVGap;
 
             } else {
-                slog("fit");
                 selectedButtonsTotalHeight = minSelectedZoneHeight;
                 unselectedButtonsVertex.y = selectedButtonsVertex.y
                         + selectedButtonsTotalHeight + groupVGap;
             }
-        } else {
-            slog("more than");
         }
     }
 
