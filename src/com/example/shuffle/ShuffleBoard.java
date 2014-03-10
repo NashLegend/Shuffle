@@ -67,6 +67,10 @@ public class ShuffleBoard extends RelativeLayout {
 
     private int maxTotalNumber = 0;
 
+    private int validDragDistance = dip2px(10.0f, getContext());
+    
+    private boolean isDraging=false;
+
     public ShuffleBoard(Context context) {
         super(context);
     }
@@ -76,9 +80,6 @@ public class ShuffleBoard extends RelativeLayout {
         initView();
     }
 
-    /**
-     * 目前buttons好像不在格子中间
-     */
     private void InitDatas() {
         getButtons();
         selectMarginTop = dip2px(selectMarginTop, getContext());
@@ -191,17 +192,28 @@ public class ShuffleBoard extends RelativeLayout {
                             lastY = startY;
                             ddx = event.getX();
                             ddy = event.getY();
+                            ShuffleBoard.this.removeView(currentButton);
+                            ShuffleBoard.this.addView(currentButton);
                         }
                         break;
                     case MotionEvent.ACTION_MOVE:
                         float dx = event.getRawX() - lastX;
                         float dy = event.getRawY() - lastY;
-                        if (dx * dx + dy * dy > 9) {
-                            moved = true;
-                            lastX = event.getRawX();
-                            lastY = event.getRawY();
-                            moveButton(event.getRawX() - ddx, event.getRawY() - ddy);
+                        if (moved) {
+                            if (dx * dx + dy * dy > 9) {
+                                lastX = event.getRawX();
+                                lastY = event.getRawY();
+                                moveButton(event.getRawX() - ddx, event.getRawY() - ddy);
+                            }
+                        } else {
+                            if (Math.sqrt(dx * dx + dy * dy) > validDragDistance) {
+                                moved = true;
+                                lastX = event.getRawX();
+                                lastY = event.getRawY();
+                                moveButton(event.getRawX() - ddx, event.getRawY() - ddy);
+                            }
                         }
+
                         break;
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_CANCEL:

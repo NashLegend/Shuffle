@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 
 /**
  * @author NashLegend
@@ -19,9 +20,10 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         RelativeLayout rootLayout = (RelativeLayout) findViewById(R.id.ctt);
+        ScrollView scroller=(ScrollView)findViewById(R.id.scroller);
         board = new ShuffleBoard(this);
         board.setLayoutParams(new LayoutParams(-1, -1));
-        rootLayout.addView(board);
+        scroller.addView(board);
         board.getViewTreeObserver().addOnGlobalLayoutListener(
                 new OnGlobalLayoutListener() {
 
