@@ -1,0 +1,274 @@
+
+package com.example.shuffle;
+
+import java.util.ArrayList;
+
+import android.content.Context;
+import android.graphics.Point;
+import android.graphics.PointF;
+import android.os.Handler;
+import android.view.MotionEvent;
+import android.view.View;
+
+public class ShuffleCardSenator extends ShuffleCard {
+    private int standardMinHeight = 0;
+    private MovableButton currentButton;
+    private int lastRow = 0;
+    private int lastCol = 0;
+
+    public ShuffleCardSenator(Context context, ShuffleDesk desk) {
+        super(context, desk);
+    }
+    
+
+    @Override
+    public void banishButton(MovableButton button) {
+        super.banishButton(button);
+        if ((getHeight() > standardMinHeight) && (computeHeight() < getHeight())) {
+            shrink();
+        }
+        removeView(button);
+    }
+
+
+    @Override
+    public void getResident(MovableButton button) {
+        super.getResident(button);
+
+        if (computeHeight() > getHeight() && computeHeight() > standardMinHeight) {
+            expand();
+        }
+        int i = list.size() - 1;
+        Point point = new Point();
+        point.x = i % ShuffleDesk.Colums;
+        point.y = i / ShuffleDesk.Colums;
+        button.setPosition(point);
+        button.setTargetPosition(new Point(point.x, point.y));
+
+        button.setXX(point.x * ShuffleDesk.buttonCellWidth + ShuffleDesk.hGap);
+        button.setYY(point.y * ShuffleDesk.buttonCellHeight + ShuffleDesk.vGap);
+        this.addView(button);
+    }
+
+    private void moveButton(float dx, float dy) {
+        int[] location = {
+                0, 0
+        };
+        this.getLocationOnScreen(location);
+        currentButton.setXX(dx - location[0]);
+        currentButton.setYY(dy - location[1]);
+        getCurrentXone();
+    }
+
+    private void getCurrentXone() {
+        PointF pointF = getCurrentButtonCenter();
+        int crtRow = 0;
+        int crtCol = 0;
+        ArrayList<MovableButton> buttons = new ArrayList<MovableButton>();
+        if (pointF == null) {
+            return;
+        }
+
+        crtCol = (int) (pointF.x / ShuffleDesk.buttonCellWidth);
+        crtRow = (int) (pointF.y / ShuffleDesk.buttonCellHeight);
+        if (crtRow < 0) {
+            crtRow = 0;
+        }
+        if (crtCol < 0) {
+            crtCol = 0;
+        }
+        if (crtCol >= ShuffleDesk.Colums) {
+            crtCol = ShuffleDesk.Colums - 1;
+        }
+        if (crtCol != lastCol || crtRow != lastRow) {
+            buttons = getAnimatedButtonsBetween(crtRow, crtCol,
+                    lastRow, lastCol);
+        }
+
+        setupAnimator(buttons);
+        currentButton.setTargetPosition(new Point(crtCol, crtRow));
+        lastRow = crtRow;
+        lastCol = crtCol;
+    }
+
+    private PointF getCurrentButtonCenter() {
+        if (currentButton != null) {
+            return new PointF(currentButton.getXX() + currentButton.getWidth() / 2,
+                    currentButton.getYY() + currentButton.getHeight() / 2);
+        } else {
+            return null;
+        }
+    }
+
+    private void putButtonDown() {
+        PointF pointF = getCurrentButtonCenter();
+        int crtRow = 0;
+        int crtCol = 0;
+        ArrayList<MovableButton> buttons = new ArrayList<MovableButton>();
+        if (pointF == null) {
+            return;
+        }
+        crtCol = (int) (pointF.x / ShuffleDesk.buttonCellWidth);
+        crtRow = (int) pointF.y / ShuffleDesk.buttonCellHeight;
+        if (crtRow < 0) {
+            crtRow = 0;
+        }
+        if (crtCol < 0) {
+            crtCol = 0;
+        }
+        if (crtCol >= ShuffleDesk.Colums) {
+            crtCol = ShuffleDesk.Colums - 1;
+        }
+
+        Point point = new Point(crtCol, crtRow);
+        int ind = crtRow * ShuffleDesk.Colums + crtCol;
+        if (ind >= list.size() - 1) {
+            point.x = (list.size() - 1) % ShuffleDesk.Colums;
+            point.y = (list.size() - 1) / ShuffleDesk.Colums;
+        }
+        currentButton.setSelected(true);
+        currentButton.setTargetPosition(point);
+        buttons.add(currentButton);
+
+        setupAnimator(buttons);
+        setFinalPosition();
+
+        lastRow = 0;
+        lastCol = 0;
+        currentButton = null;
+    }
+
+    private void setFinalPosition() {
+        for (MovableButton movableButton : list) {
+            movableButton
+                    .setPosition(new Point(movableButton.getTargetPosition().x,
+                            movableButton.getTargetPosition().y));
+        }
+    }
+
+    @Override
+    public void shuffleButtons() {
+        super.shuffleButtons();
+        setLongListener();
+        LayoutParams params = (LayoutParams) getLayoutParams();
+        if (computeHeight() < standardMinHeight) {
+            params.height = standardMinHeight;
+            setLayoutParams(params);
+        } else {
+            params.height = computeHeight();
+            setLayoutParams(params);
+        }
+    }
+
+    public void startEditMode() {
+        setTouchListener();
+        desk.switch2Edit();
+        // deleteButton
+    }
+
+    public void endEditMode() {
+        setLongListener();
+        desk.switch2Normal();
+        // deleteButton
+    }
+
+    public void setTouchListener() {
+        for (MovableButton movableButton : list) {
+            movableButton.setOnTouchListener(listener);
+            movableButton.setOnLongClickListener(null);
+        }
+    }
+
+    public void setLongListener() {
+        for (MovableButton movableButton : list) {
+            movableButton.setOnLongClickListener(longClickListener);
+            movableButton.setOnTouchListener(null);
+        }
+    }
+
+    public int getStandardMinHeight() {
+        return standardMinHeight;
+    }
+
+    public void setStandardMinHeight(int standardMinHeight) {
+        this.standardMinHeight = standardMinHeight;
+    }
+
+    private OnClickListener clickListener = new OnClickListener() {
+
+        @Override
+        public void onClick(View v) {
+            MovableButton button = null;
+            banishButton(button);// v不是movablebutton
+            desk.getCandidate().getResident(button);
+        }
+    };
+
+    private OnLongClickListener longClickListener = new OnLongClickListener() {
+
+        @Override
+        public boolean onLongClick(View v) {
+            startEditMode();
+            return false;
+        }
+    };
+    private OnTouchListener listener = new OnTouchListener() {
+
+        private float lastX = 0f;
+        private float lastY = 0f;
+        private float ddx = 0f;
+        private float ddy = 0f;
+        private float startX = 0f;
+        private float startY = 0f;
+        private long finalCheckInt = 400;
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            if ((currentButton == null && event.getAction() == MotionEvent.ACTION_DOWN)
+                    || currentButton == v) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        if (currentButton == null) {
+                            currentButton = (MovableButton) v;
+                            startX = event.getRawX();
+                            startY = event.getRawY();
+                            lastRow = currentButton.getPosition().y;
+                            lastCol = currentButton.getPosition().x;
+                            lastX = startX;
+                            lastY = startY;
+                            ddx = event.getX();
+                            ddy = event.getY();
+                            ShuffleCardSenator.this.removeView(currentButton);
+                            ShuffleCardSenator.this.addView(currentButton);
+                        }
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        float dx = event.getRawX() - lastX;
+                        float dy = event.getRawY() - lastY;
+                        if (dx * dx + dy * dy > 9) {
+                            lastX = event.getRawX();
+                            lastY = event.getRawY();
+                            moveButton(event.getRawX() - ddx, event.getRawY() - ddy);
+                        }
+
+                        break;
+                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_CANCEL:
+                        moveButton(event.getRawX() - ddx, event.getRawY() - ddy);
+                        putButtonDown();
+                        new Handler().postDelayed(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                finalCheck();
+                            }
+                        }, finalCheckInt);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return false;
+        }
+    };
+}

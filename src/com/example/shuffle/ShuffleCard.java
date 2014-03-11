@@ -1,0 +1,251 @@
+
+package com.example.shuffle;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
+import android.animation.ValueAnimator;
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.graphics.Point;
+import android.os.Build;
+import android.util.AttributeSet;
+import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
+
+@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+public class ShuffleCard extends RelativeLayout {
+
+    public ShuffleDesk desk;
+    private Object animator;
+    private int targetHeight;
+    private OnSizeChangingListener onSizeChangingListener;
+    public ArrayList<MovableButton> list;
+
+    public static final int MODE_SHRINK = 0;
+    public static final int MODE_EXPAND = 1;
+
+    public ShuffleCard(Context context, ShuffleDesk desk) {
+        super(context);
+        this.desk = desk;
+    }
+
+    public void setHeight(int height) {
+        LayoutParams params = (LayoutParams) getLayoutParams();
+        params.height = height;
+        setLayoutParams(params);
+    }
+
+    public int computeHeight() {
+        return (int) Math.ceil((double) (list.size()) / ShuffleDesk.Colums);
+    }
+
+    public void banishButton(MovableButton button) {
+        list.remove(button);
+    }
+
+    public void getResident(MovableButton button) {
+        list.add(button);
+    }
+
+    /**
+     * MultiAnimator
+     * 
+     * @param buttons
+     */
+    public void setupAnimator(ArrayList<MovableButton> buttons) {
+        if (buttons != null && buttons.size() > 0) {
+            Point point = new Point(0, 0);
+            for (MovableButton movableButton : buttons) {
+                movableButton.startAnimator(point);
+            }
+        }
+    }
+
+    public void shrink() {
+        targetHeight -= ShuffleDesk.buttonCellHeight;
+        changeSize(targetHeight);
+        notifySizeChanging(targetHeight, MODE_SHRINK);
+    }
+
+    public void expand() {
+        targetHeight += ShuffleDesk.buttonCellHeight;
+        changeSize(targetHeight);
+        notifySizeChanging(targetHeight, MODE_EXPAND);
+    }
+
+    public void shuffleButtons() {
+        for (int i = 0; i < list.size(); i++) {
+            MovableButton button = list.get(i);
+            Point point = new Point();
+            point.x = i % ShuffleDesk.Colums;
+            point.y = i / ShuffleDesk.Colums;
+            button.setPosition(point);
+            button.setTargetPosition(new Point(point.x, point.y));
+
+            LayoutParams params = new LayoutParams(ShuffleDesk.buttonWidth,
+                    ShuffleDesk.buttonHeight);
+            params.leftMargin = point.x * ShuffleDesk.buttonCellWidth + ShuffleDesk.hGap;
+            params.topMargin = point.y * ShuffleDesk.buttonCellHeight + ShuffleDesk.vGap;
+            button.setLayoutParams(params);
+            this.addView(button);
+        }
+    }
+
+    public void changeSize(int height) {
+        if (Build.VERSION.SDK_INT < ShuffleBoard.animateVersion) {
+            LayoutParams params = (LayoutParams) getLayoutParams();
+            params.height = height;
+            setLayoutParams(params);
+        } else {
+            if (animator != null && ((ValueAnimator) animator).isRunning()) {
+                ((ValueAnimator) animator).cancel();
+            }
+            animator = ObjectAnimator.ofInt(this, "height", getHeight(), height);
+            ((ValueAnimator) animator).setDuration(100);
+            ((ValueAnimator) animator).start();
+        }
+    }
+
+    public void notifySizeChanging(int height, int mode) {
+        if (onSizeChangingListener != null) {
+            onSizeChangingListener.onSizeChanging(height, mode);
+        }
+    }
+
+    /**
+     * 向index减小方向后退
+     * 
+     * @param buttons
+     */
+    public void moveBack(ArrayList<MovableButton> buttons) {
+        for (Iterator<MovableButton> iterator = buttons.iterator(); iterator
+                .hasNext();) {
+            MovableButton movableButton = (MovableButton) iterator.next();
+            movableButton.setTargetPositionIsPrev();
+        }
+        setupAnimator(buttons);
+    }
+
+    /**
+     * 向index增大方向前进
+     * 
+     * @param buttons
+     */
+    public void moveForward(ArrayList<MovableButton> buttons) {
+        for (Iterator<MovableButton> iterator = buttons.iterator(); iterator
+                .hasNext();) {
+            MovableButton movableButton = (MovableButton) iterator.next();
+            movableButton.setTargetPositionIsNext();
+        }
+        setupAnimator(buttons);
+    }
+
+    public ArrayList<MovableButton> getAnimatedButtonsBetween(int crtRow, int crtCol, int lastRow,
+            int lastCol) {
+        boolean movingForward = crtRow * ShuffleDesk.Colums + crtCol - lastRow * ShuffleDesk.Colums
+                - lastCol > 0;
+        ArrayList<MovableButton> buttons = new ArrayList<MovableButton>();
+        for (int i = 0; i < list.size(); i++) {
+            MovableButton button = list.get(i);
+            if (isBetweenPoint(button.getTargetPosition().y,
+                    button.getTargetPosition().x, crtRow, crtCol, lastRow,
+                    lastCol)) {
+                buttons.add(button);
+            }
+        }
+        if (movingForward) {
+            moveForward(buttons);
+        } else {
+            moveBack(buttons);
+        }
+        return buttons;
+    }
+
+    private boolean isBetweenPoint(int row, int col, int crtRow, int crtCol,
+            int lastRow, int lastCol) {
+        int tis = row * ShuffleDesk.Colums + col;
+        int crt = crtRow * ShuffleDesk.Colums + crtCol;
+        int lst = lastRow * ShuffleDesk.Colums + lastCol;
+        if (lst < tis && tis <= crt) {
+            return true;
+        } else if (lst > tis && tis >= crt) {
+            return true;
+        }
+        return false;
+    }
+
+    public ArrayList<MovableButton> getAfter(int lastRow, int lastCol, boolean isTarget) {
+        ArrayList<MovableButton> buttons = new ArrayList<MovableButton>();
+        for (int i = 0; i < list.size(); i++) {
+            MovableButton button = list.get(i);
+
+            if (isAfterPoint(button.getTargetPosition().y,
+                    button.getTargetPosition().x, lastRow, lastCol,
+                    isTarget)) {
+                buttons.add(button);
+            }
+        }
+
+        if (isTarget) {
+            moveForward(buttons);
+        } else {
+            moveBack(buttons);
+        }
+        return buttons;
+    }
+
+    private boolean isAfterPoint(int row, int col, int crtRow, int crtCol,
+            boolean isTarget) {
+        int tis = row * ShuffleDesk.Colums + col;
+        int crt = crtRow * ShuffleDesk.Colums + crtCol;
+        if (isTarget && tis >= crt) {
+            return true;
+        }
+
+        if (!isTarget && tis > crt) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public ArrayList<MovableButton> getBetweenButtons() {
+        return null;
+    }
+
+    public void finalCheck() {
+
+    }
+
+    public interface OnSizeChangingListener {
+        public abstract void onSizeChanging(int height, int mode);
+    }
+
+    public int getTargetHeight() {
+        return targetHeight;
+    }
+
+    public void setTargetHeight(int targetHeight) {
+        this.targetHeight = targetHeight;
+    }
+
+    public OnSizeChangingListener getOnSizeChangingListener() {
+        return onSizeChangingListener;
+    }
+
+    public void setOnSizeChangingListener(OnSizeChangingListener onSizeChangingListener) {
+        this.onSizeChangingListener = onSizeChangingListener;
+    }
+
+    public ArrayList<MovableButton> getList() {
+        return list;
+    }
+
+    public void setList(ArrayList<MovableButton> list) {
+        this.list = list;
+    }
+
+}

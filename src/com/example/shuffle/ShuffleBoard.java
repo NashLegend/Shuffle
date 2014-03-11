@@ -15,10 +15,11 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.Toast;
 
 /**
- * @author NashLegend 建立在不超过一屏的基础上
+ * @author NashLegend
  */
 public class ShuffleBoard extends RelativeLayout {
     private ArrayList<MovableButton> selectedButtons = new ArrayList<MovableButton>();
@@ -37,7 +38,7 @@ public class ShuffleBoard extends RelativeLayout {
     public static int hGap = 0;
     public static int buttonCellWidth = 0;
     public static int buttonCellHeight = 0;
-    public static int animateVersion = 11;
+    public static int animateVersion = 19;
     private int groupVGapDip = 60;
     private int groupVGap = 0;
     private Point selectedButtonsVertex = new Point(0, 0);
@@ -68,14 +69,17 @@ public class ShuffleBoard extends RelativeLayout {
     private int maxTotalNumber = 0;
 
     private int validDragDistance = dip2px(10.0f, getContext());
-    
-    private boolean isDraging=false;
+
+    private boolean isDraging = false;
+
+    private ScrollView scroller;
 
     public ShuffleBoard(Context context) {
         super(context);
     }
 
-    public void startView() {
+    public void startView(ScrollView view) {
+        scroller = view;
         InitDatas();
         initView();
     }
@@ -107,9 +111,9 @@ public class ShuffleBoard extends RelativeLayout {
                 + selectedButtonsVertex.y;
         if (totHeight > this.getHeight()) {
             // TODO
-            showToast(getContext(),
-                    "Sell your phone and go buy a bigger one please !",
-                    Toast.LENGTH_SHORT);
+//            showToast(getContext(),
+//                    "Sell your phone and go buy a bigger one please !",
+//                    Toast.LENGTH_SHORT);
             android.view.ViewGroup.LayoutParams params = this
                     .getLayoutParams();
             params.height = totHeight;
@@ -176,6 +180,7 @@ public class ShuffleBoard extends RelativeLayout {
                     || currentButton == v) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
+                        scroller.requestDisallowInterceptTouchEvent(true);
                         if (currentButton == null) {
                             moved = false;
                             currentButton = (MovableButton) v;
@@ -218,6 +223,7 @@ public class ShuffleBoard extends RelativeLayout {
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_CANCEL:
                         // slog("OK Here it is up ~~~~~~~~~~~~");
+                        scroller.requestDisallowInterceptTouchEvent(false);
                         if (moved) {
                             moveButton(event.getRawX() - ddx, event.getRawY() - ddy);
                             putButtonDown();
@@ -1029,9 +1035,9 @@ public class ShuffleBoard extends RelativeLayout {
                 + selectedButtonsVertex.y;
         // 挤满也放不下一屏幕了
         if (totHeight > this.getHeight()) {
-            showToast(getContext(),
-                    "Sell your phone and go buy a bigger one please !",
-                    Toast.LENGTH_SHORT);
+//            showToast(getContext(),
+//                    "Sell your phone and go buy a bigger one please !",
+//                    Toast.LENGTH_SHORT);
             android.view.ViewGroup.LayoutParams params = this
                     .getLayoutParams();
             params.height = totHeight;

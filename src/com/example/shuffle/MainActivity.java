@@ -14,13 +14,14 @@ import android.widget.ScrollView;
 public class MainActivity extends Activity {
 
     private ShuffleBoard board;
+    private ScrollView scroller;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         RelativeLayout rootLayout = (RelativeLayout) findViewById(R.id.ctt);
-        ScrollView scroller=(ScrollView)findViewById(R.id.scroller);
+        scroller = (ScrollView) findViewById(R.id.scroller);
         board = new ShuffleBoard(this);
         board.setLayoutParams(new LayoutParams(-1, -1));
         scroller.addView(board);
@@ -32,7 +33,7 @@ public class MainActivity extends Activity {
                     public void onGlobalLayout() {
                         board.getViewTreeObserver()
                                 .removeGlobalOnLayoutListener(this);
-                        board.startView();
+                        board.startView(scroller);
                     }
                 });
     }
