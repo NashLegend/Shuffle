@@ -68,8 +68,8 @@ public class ShuffleBoard extends RelativeLayout {
     private int maxTotalNumber = 0;
 
     private int validDragDistance = dip2px(10.0f, getContext());
-    
-    private boolean isDraging=false;
+
+    private boolean isDraging = false;
 
     public ShuffleBoard(Context context) {
         super(context);
@@ -216,14 +216,25 @@ public class ShuffleBoard extends RelativeLayout {
 
                         break;
                     case MotionEvent.ACTION_UP:
-                    case MotionEvent.ACTION_CANCEL:
-                        // slog("OK Here it is up ~~~~~~~~~~~~");
+                        slog("OK Here it is up ~~~~~~~~~~~~");
                         if (moved) {
                             moveButton(event.getRawX() - ddx, event.getRawY() - ddy);
                             putButtonDown();
                         } else {
                             flipAcross();
                         }
+                        remeasure();
+                        new Handler().postDelayed(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                finalCheck();
+                            }
+                        }, finalCheckInt);
+                    case MotionEvent.ACTION_CANCEL:
+                        slog("OK Here it is Cancel ~~~~~~~~~~~~");
+                        moveButton(event.getRawX() - ddx, event.getRawY() - ddy);
+                        putButtonDown();
                         remeasure();
                         new Handler().postDelayed(new Runnable() {
 
