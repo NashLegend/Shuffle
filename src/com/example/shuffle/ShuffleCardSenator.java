@@ -3,10 +3,13 @@ package com.example.shuffle;
 
 import java.util.ArrayList;
 
+import android.app.Service;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.os.Handler;
+import android.os.Vibrator;
+import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -15,27 +18,39 @@ public class ShuffleCardSenator extends ShuffleCard {
     private MovableButton currentButton;
     private int lastRow = 0;
     private int lastCol = 0;
+    private float lastX = 0f;
+    private float lastY = 0f;
+    private float ddx = 0f;
+    private float ddy = 0f;
+    private boolean edited = false;
 
-    public ShuffleCardSenator(Context context, ShuffleDesk desk) {
-        super(context, desk);
+    public ShuffleCardSenator(Context context) {
+        super(context);
     }
-    
+
+    public ShuffleCardSenator(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
 
     @Override
     public void banishButton(MovableButton button) {
-        super.banishButton(button);
         if ((getHeight() > standardMinHeight) && (computeHeight() < getHeight())) {
             shrink();
         }
+        setupAnimator(getAfter(button.getPosition().y,
+                button.getPosition().x, false));
+        list.remove(button);
         removeView(button);
+        setFinalPosition();
+        button.setOnLongClickListener(null);
+        button.setOnTouchListener(null);
+        button.setOnClickListener(null);
     }
-
 
     @Override
     public void getResident(MovableButton button) {
         super.getResident(button);
-
-        if (computeHeight() > getHeight() && computeHeight() > standardMinHeight) {
+        if (computeHeight() > targetHeight && computeHeight() > standardMinHeight) {
             expand();
         }
         int i = list.size() - 1;
@@ -45,8 +60,13 @@ public class ShuffleCardSenator extends ShuffleCard {
         button.setPosition(point);
         button.setTargetPosition(new Point(point.x, point.y));
 
-        button.setXX(point.x * ShuffleDesk.buttonCellWidth + ShuffleDesk.hGap);
-        button.setYY(point.y * ShuffleDesk.buttonCellHeight + ShuffleDesk.vGap);
+        LayoutParams params = (LayoutParams) button.getLayoutParams();
+
+        params.leftMargin = point.x * ShuffleDesk.buttonCellWidth + ShuffleDesk.hGap;
+        params.topMargin = point.y * ShuffleDesk.buttonCellHeight + ShuffleDesk.vGap;
+
+        button.setOnClickListener(clickListener);
+        button.setOnLongClickListener(longClickListener);
         this.addView(button);
     }
 
@@ -138,18 +158,11 @@ public class ShuffleCardSenator extends ShuffleCard {
         currentButton = null;
     }
 
-    private void setFinalPosition() {
-        for (MovableButton movableButton : list) {
-            movableButton
-                    .setPosition(new Point(movableButton.getTargetPosition().x,
-                            movableButton.getTargetPosition().y));
-        }
-    }
-
     @Override
     public void shuffleButtons() {
         super.shuffleButtons();
         setLongListener();
+        setClickListener();
         LayoutParams params = (LayoutParams) getLayoutParams();
         if (computeHeight() < standardMinHeight) {
             params.height = standardMinHeight;
@@ -158,17 +171,37 @@ public class ShuffleCardSenator extends ShuffleCard {
             params.height = computeHeight();
             setLayoutParams(params);
         }
+        targetHeight = params.height;
     }
 
     public void startEditMode() {
+        edited = true;
         setTouchListener();
         desk.switch2Edit();
+        fulfill();
         // deleteButton
+    }
+
+    public void fulfill() {
+        targetHeight = scroller.getHeight();
+        changeSize(targetHeight);
+    }
+
+    public void restore() {
+        if (computeHeight() < standardMinHeight) {
+            targetHeight = standardMinHeight;
+        } else {
+            targetHeight = computeHeight();
+        }
+        changeSize(targetHeight);
     }
 
     public void endEditMode() {
         setLongListener();
+        setClickListener();
         desk.switch2Normal();
+        restore();
+        edited = false;
         // deleteButton
     }
 
@@ -176,12 +209,20 @@ public class ShuffleCardSenator extends ShuffleCard {
         for (MovableButton movableButton : list) {
             movableButton.setOnTouchListener(listener);
             movableButton.setOnLongClickListener(null);
+            movableButton.setOnClickListener(null);
         }
     }
 
     public void setLongListener() {
         for (MovableButton movableButton : list) {
             movableButton.setOnLongClickListener(longClickListener);
+            movableButton.setOnTouchListener(null);
+        }
+    }
+
+    public void setClickListener() {
+        for (MovableButton movableButton : list) {
+            movableButton.setOnClickListener(clickListener);
             movableButton.setOnTouchListener(null);
         }
     }
@@ -198,9 +239,11 @@ public class ShuffleCardSenator extends ShuffleCard {
 
         @Override
         public void onClick(View v) {
-            MovableButton button = null;
-            banishButton(button);// v不是movablebutton
-            desk.getCandidate().getResident(button);
+            if (list.size() > ShuffleDesk.minButtons) {
+                MovableButton button = (MovableButton) v;
+                banishButton(button);//
+                desk.getCandidate().getResident(button.clone());
+            }
         }
     };
 
@@ -208,18 +251,27 @@ public class ShuffleCardSenator extends ShuffleCard {
 
         @Override
         public boolean onLongClick(View v) {
+            
+            Vibrator vibrator=(Vibrator)getContext().getSystemService(Service.VIBRATOR_SERVICE);
+            vibrator.vibrate(20);
+            
+            currentButton = (MovableButton) v;
             startEditMode();
+            int[] location = {
+                    0, 0
+            };
+            v.getLocationOnScreen(location);
+            lastX = location[0] + v.getWidth() / 2;
+            lastY = location[1] + v.getHeight() / 2;
+            ddx = v.getWidth() / 2;
+            ddy = v.getHeight() / 2;
+            lastRow = currentButton.getPosition().y;
+            lastCol = currentButton.getPosition().x;
             return false;
         }
     };
     private OnTouchListener listener = new OnTouchListener() {
 
-        private float lastX = 0f;
-        private float lastY = 0f;
-        private float ddx = 0f;
-        private float ddy = 0f;
-        private float startX = 0f;
-        private float startY = 0f;
         private long finalCheckInt = 400;
 
         @Override
@@ -230,12 +282,10 @@ public class ShuffleCardSenator extends ShuffleCard {
                     case MotionEvent.ACTION_DOWN:
                         if (currentButton == null) {
                             currentButton = (MovableButton) v;
-                            startX = event.getRawX();
-                            startY = event.getRawY();
+                            lastX = event.getRawX();
+                            lastY = event.getRawY();
                             lastRow = currentButton.getPosition().y;
                             lastCol = currentButton.getPosition().x;
-                            lastX = startX;
-                            lastY = startY;
                             ddx = event.getX();
                             ddy = event.getY();
                             ShuffleCardSenator.this.removeView(currentButton);
@@ -250,17 +300,16 @@ public class ShuffleCardSenator extends ShuffleCard {
                             lastY = event.getRawY();
                             moveButton(event.getRawX() - ddx, event.getRawY() - ddy);
                         }
-
                         break;
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_CANCEL:
                         moveButton(event.getRawX() - ddx, event.getRawY() - ddy);
                         putButtonDown();
                         new Handler().postDelayed(new Runnable() {
-
                             @Override
                             public void run() {
-                                finalCheck();
+                                // finalCheck();
+                                endEditMode();
                             }
                         }, finalCheckInt);
                         break;

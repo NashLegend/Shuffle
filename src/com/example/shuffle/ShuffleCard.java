@@ -2,34 +2,49 @@
 package com.example.shuffle;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 
 import android.animation.ObjectAnimator;
-import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Point;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.RelativeLayout;
-import android.widget.RelativeLayout.LayoutParams;
+import android.widget.ScrollView;
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class ShuffleCard extends RelativeLayout {
 
     public ShuffleDesk desk;
+    public ScrollView scroller;
     private Object animator;
-    private int targetHeight;
+    public int targetHeight;
     private OnSizeChangingListener onSizeChangingListener;
     public ArrayList<MovableButton> list;
 
     public static final int MODE_SHRINK = 0;
     public static final int MODE_EXPAND = 1;
 
-    public ShuffleCard(Context context, ShuffleDesk desk) {
+    public ShuffleCard(Context context) {
         super(context);
+    }
+
+    public ShuffleCard(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+    public void setDesk(ShuffleDesk desk, ScrollView scroller) {
         this.desk = desk;
+        this.scroller = scroller;
+    }
+
+    public ShuffleDesk getDesk() {
+        return this.desk;
     }
 
     public void setHeight(int height) {
@@ -39,7 +54,8 @@ public class ShuffleCard extends RelativeLayout {
     }
 
     public int computeHeight() {
-        return (int) Math.ceil((double) (list.size()) / ShuffleDesk.Colums);
+        return (int) Math.ceil((double) (list.size()) / ShuffleDesk.Colums)
+                * ShuffleDesk.buttonCellHeight;
     }
 
     public void banishButton(MovableButton button) {
@@ -95,7 +111,7 @@ public class ShuffleCard extends RelativeLayout {
     }
 
     public void changeSize(int height) {
-        if (Build.VERSION.SDK_INT < ShuffleBoard.animateVersion) {
+        if (Build.VERSION.SDK_INT < ShuffleDesk.animateVersion) {
             LayoutParams params = (LayoutParams) getLayoutParams();
             params.height = height;
             setLayoutParams(params);
@@ -145,8 +161,9 @@ public class ShuffleCard extends RelativeLayout {
 
     public ArrayList<MovableButton> getAnimatedButtonsBetween(int crtRow, int crtCol, int lastRow,
             int lastCol) {
+        Log.i("shuffle", crtRow + " " + crtCol + " " + lastRow + " " + lastCol);
         boolean movingForward = crtRow * ShuffleDesk.Colums + crtCol - lastRow * ShuffleDesk.Colums
-                - lastCol > 0;
+                - lastCol < 0;
         ArrayList<MovableButton> buttons = new ArrayList<MovableButton>();
         for (int i = 0; i < list.size(); i++) {
             MovableButton button = list.get(i);
@@ -162,6 +179,14 @@ public class ShuffleCard extends RelativeLayout {
             moveBack(buttons);
         }
         return buttons;
+    }
+
+    public void setFinalPosition() {
+        for (MovableButton movableButton : list) {
+            movableButton
+                    .setPosition(new Point(movableButton.getTargetPosition().x,
+                            movableButton.getTargetPosition().y));
+        }
     }
 
     private boolean isBetweenPoint(int row, int col, int crtRow, int crtCol,
@@ -217,7 +242,34 @@ public class ShuffleCard extends RelativeLayout {
     }
 
     public void finalCheck() {
+        ButtonComparator comparator = new ButtonComparator();
+        Collections.sort(list, comparator);
+        for (int i = 0; i < list.size(); i++) {
+            MovableButton button = list.get(i);
+            Point point = new Point();
+            point.x = i % ShuffleDesk.Colums;
+            point.y = i / ShuffleDesk.Colums;
+            button.setPosition(point);
+            button.setTargetPosition(new Point(point.x, point.y));
+            button.setXX(point.x * ShuffleDesk.buttonCellWidth + ShuffleDesk.hGap);
+            button.setYY(point.y * ShuffleDesk.buttonCellHeight + ShuffleDesk.vGap);
+        }
+    }
 
+    public class ButtonComparator implements Comparator<MovableButton> {
+
+        @Override
+        public int compare(MovableButton lhs, MovableButton rhs) {
+            int com = lhs.getIndex() - rhs.getIndex();
+            if (com > 0) {
+                return 1;
+            } else if (com == 0) {
+                return 0;
+            } else {
+                return -1;
+            }
+
+        }
     }
 
     public interface OnSizeChangingListener {

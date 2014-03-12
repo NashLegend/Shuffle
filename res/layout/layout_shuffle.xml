@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="#f000f0"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
     <com.example.shuffle.ShuffleCardSenator
         android:id="@+id/senator"
+        android:background="#00ffff"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <com.example.shuffle.ShuffleCardCandidate
         android:id="@+id/candidate"
+        android:background="#0fffff"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/senator" />
+        android:layout_below="@id/senator"
+        android:layout_marginTop="50dp" />
 
 </RelativeLayout>

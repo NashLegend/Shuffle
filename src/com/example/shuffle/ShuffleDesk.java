@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.Toast;
 import android.widget.RelativeLayout.LayoutParams;
 
@@ -37,8 +38,17 @@ public class ShuffleDesk extends RelativeLayout {
     public static int maxButtons = 24;
     private static Toast mToast = null;
 
-    public ShuffleDesk(Context context) {
+    public ShuffleDesk(Context context, ScrollView scrollView) {
         super(context);
+        LayoutInflater inflater = (LayoutInflater) context
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        inflater.inflate(R.layout.layout_shuffle, this);
+
+        candidate = (ShuffleCardCandidate) findViewById(R.id.candidate);
+        senator = (ShuffleCardSenator) findViewById(R.id.senator);
+
+        candidate.setDesk(this, scrollView);
+        senator.setDesk(this, scrollView);
     }
 
     public ShuffleDesk(Context context, AttributeSet attrs) {
@@ -50,16 +60,17 @@ public class ShuffleDesk extends RelativeLayout {
         candidate = (ShuffleCardCandidate) findViewById(R.id.candidate);
         senator = (ShuffleCardSenator) findViewById(R.id.senator);
     }
-    
+
     public void switch2Edit() {
         candidate.setVisibility(View.GONE);
     }
-    
+
     public void switch2Normal() {
         candidate.setVisibility(View.VISIBLE);
     }
 
     public void InitDatas() {
+
         getButtons();
 
         vGap = dip2px(vGapDip, getContext());
@@ -71,9 +82,7 @@ public class ShuffleDesk extends RelativeLayout {
         buttonWidth = buttonCellWidth - hGap * 2;
         buttonCellHeight = buttonHeight + vGap * 2;
 
-        minSelectedZoneHeight = (int) Math
-                .ceil(((this.getHeight() * 0.4) / buttonCellHeight))
-                * buttonCellHeight;
+        minSelectedZoneHeight = buttonCellHeight * 4;
         senator.setStandardMinHeight(minSelectedZoneHeight);
 
         senator.setList(selectedButtons);
@@ -105,22 +114,6 @@ public class ShuffleDesk extends RelativeLayout {
     private void shuffleButtons() {
         senator.shuffleButtons();
         candidate.shuffleButtons();
-    }
-
-    public class ButtonComparator implements Comparator<MovableButton> {
-
-        @Override
-        public int compare(MovableButton lhs, MovableButton rhs) {
-            int com = lhs.getIndex() - rhs.getIndex();
-            if (com > 0) {
-                return 1;
-            } else if (com == 0) {
-                return 0;
-            } else {
-                return -1;
-            }
-
-        }
     }
 
     public void slog(String string) {
