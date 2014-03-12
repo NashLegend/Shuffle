@@ -34,12 +34,12 @@ public class ShuffleCardSenator extends ShuffleCard {
 
     @Override
     public void banishButton(MovableButton button) {
+        list.remove(button);
         if ((targetHeight > standardMinHeight) && (computeHeight() < targetHeight)) {
             shrink();
         }
         setupAnimator(getAfter(button.getPosition().y,
                 button.getPosition().x, false));
-        list.remove(button);
         removeView(button);
         setFinalPosition();
         button.setOnLongClickListener(null);
