@@ -161,7 +161,6 @@ public class ShuffleCard extends RelativeLayout {
 
     public ArrayList<MovableButton> getAnimatedButtonsBetween(int crtRow, int crtCol, int lastRow,
             int lastCol) {
-        Log.i("shuffle", crtRow + " " + crtCol + " " + lastRow + " " + lastCol);
         boolean movingForward = crtRow * ShuffleDesk.Colums + crtCol - lastRow * ShuffleDesk.Colums
                 - lastCol < 0;
         ArrayList<MovableButton> buttons = new ArrayList<MovableButton>();

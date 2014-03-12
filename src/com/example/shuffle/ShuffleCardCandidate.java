@@ -31,6 +31,9 @@ public class ShuffleCardCandidate extends ShuffleCard {
     @Override
     public void banishButton(MovableButton button) {
         super.banishButton(button);
+        if (computeHeight() < targetHeight) {
+            shrink();
+        }
         removeView(button);
         setupAnimator(getAfter(button.getPosition().y,
                 button.getPosition().x, false));
@@ -42,6 +45,9 @@ public class ShuffleCardCandidate extends ShuffleCard {
         // TODO 自动生成的方法存根
         setupAnimator(getAfter(button.getPosition().y, button.getPosition().x, true));
         addButtonAt(button, new Point(0, 0));
+        if (computeHeight() > targetHeight) {
+            expand();
+        }
         setFinalPosition();
     }
 
