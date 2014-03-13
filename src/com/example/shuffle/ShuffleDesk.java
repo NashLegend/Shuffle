@@ -77,8 +77,6 @@ public class ShuffleDesk extends RelativeLayout {
 
     public void InitDatas() {
 
-        getButtons();
-
         vGap = dip2px(vGapDip, getContext());
         hGap = dip2px(hGapDip, getContext());
 
@@ -99,35 +97,16 @@ public class ShuffleDesk extends RelativeLayout {
         shuffleButtons();
     }
 
-    private void getButtons() {
-        for (int i = 0; i < 12; i++) {
-            MovableButton button = new MovableButton(getContext());
-            button.setTitle("btn_" + i);
-            button.setId(i);
-            button.setSelected(true);
-            selectedButtons.add(button);
-        }
-
-        for (int i = 20; i < 30; i++) {
-            MovableButton button = new MovableButton(getContext());
-            button.setTitle("btn_" + i);
-            button.setId(i);
-            button.setSelected(false);
-            unselectedButtons.add(button);
-        }
-    }
-
-    /**
-     * 提交更改
-     */
-    public void commitChanges() {
-        selectedButtons = senator.getList();
-        unselectedButtons = candidate.getList();
-    }
-
     private void shuffleButtons() {
         senator.shuffleButtons();
         candidate.shuffleButtons();
+    }
+    
+    public ArrayList<MovableButton> getButtons() {
+        ArrayList<MovableButton> buttons=new ArrayList<MovableButton>();
+        buttons.addAll(senator.getList());
+        buttons.addAll(candidate.getList());
+        return buttons;
     }
 
     public void slog(String string) {
@@ -168,5 +147,21 @@ public class ShuffleDesk extends RelativeLayout {
 
     public void setCandidate(ShuffleCardCandidate candidate) {
         this.candidate = candidate;
+    }
+
+    public ArrayList<MovableButton> getSelectedButtons() {
+        return selectedButtons;
+    }
+
+    public void setSelectedButtons(ArrayList<MovableButton> selectedButtons) {
+        this.selectedButtons = selectedButtons;
+    }
+
+    public ArrayList<MovableButton> getUnselectedButtons() {
+        return unselectedButtons;
+    }
+
+    public void setUnselectedButtons(ArrayList<MovableButton> unselectedButtons) {
+        this.unselectedButtons = unselectedButtons;
     }
 }
