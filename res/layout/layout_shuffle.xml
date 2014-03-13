@@ -1,21 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="#f000f0"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:background="#f6f7f5" >
 
-    <com.example.shuffle.ShuffleCardSenator
-        android:id="@+id/senator"
-        android:background="#00ffff"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <com.example.shuffle.ShuffleCardCandidate
-        android:id="@+id/candidate"
-        android:background="#0fffff"
+    <LinearLayout
+        android:id="@+id/SenatorLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/senator"
-        android:layout_marginTop="50dp" />
+        android:background="#ffffff"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingTop="3dp" >
+
+            <View
+                android:layout_width="8dp"
+                android:layout_height="36dp"
+                android:background="#5877bb" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="2dp"
+                android:text="@string/my_column"
+                android:textColor="#8f9fc5"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="2dp"
+                android:text="@string/custom_shuffle"
+                android:textColor="#cbcbcb"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <com.example.shuffle.ShuffleCardSenator
+            android:id="@+id/senator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/CandidateLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/SenatorLayout"
+        android:background="#f6f7f5"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingTop="3dp" >
+
+            <View
+                android:layout_width="8dp"
+                android:layout_height="32dp"
+                android:background="#5877bb" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="2dp"
+                android:text="@string/more_column"
+                android:textColor="#8f9fc5"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <com.example.shuffle.ShuffleCardCandidate
+            android:id="@+id/candidate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 
 </RelativeLayout>

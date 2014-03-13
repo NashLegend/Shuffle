@@ -13,7 +13,8 @@ import android.content.Context;
 import android.graphics.Point;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 
@@ -22,6 +23,7 @@ public class ShuffleCard extends RelativeLayout {
 
     public ShuffleDesk desk;
     public ScrollView scroller;
+    public LinearLayout parentLayout;
     private Object animator;
     public int targetHeight;
     private OnSizeChangingListener onSizeChangingListener;
@@ -38,9 +40,10 @@ public class ShuffleCard extends RelativeLayout {
         super(context, attrs);
     }
 
-    public void setDesk(ShuffleDesk desk, ScrollView scroller) {
+    public void setDesk(ShuffleDesk desk, ScrollView scroller, LinearLayout layout) {
         this.desk = desk;
         this.scroller = scroller;
+        parentLayout = layout;
     }
 
     public ShuffleDesk getDesk() {
@@ -48,7 +51,7 @@ public class ShuffleCard extends RelativeLayout {
     }
 
     public void setHeight(int height) {
-        LayoutParams params = (LayoutParams) getLayoutParams();
+        ViewGroup.LayoutParams params = (ViewGroup.LayoutParams) getLayoutParams();
         params.height = height;
         setLayoutParams(params);
     }
@@ -112,7 +115,7 @@ public class ShuffleCard extends RelativeLayout {
 
     public void changeSize(int height) {
         if (Build.VERSION.SDK_INT < ShuffleDesk.animateVersion) {
-            LayoutParams params = (LayoutParams) getLayoutParams();
+            ViewGroup.LayoutParams params = (ViewGroup.LayoutParams) getLayoutParams();
             params.height = height;
             setLayoutParams(params);
         } else {

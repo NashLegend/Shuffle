@@ -10,8 +10,10 @@ import android.graphics.PointF;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.LinearLayout;
 
 public class ShuffleCardSenator extends ShuffleCard {
     private int standardMinHeight = 0;
@@ -22,7 +24,6 @@ public class ShuffleCardSenator extends ShuffleCard {
     private float lastY = 0f;
     private float ddx = 0f;
     private float ddy = 0f;
-    private boolean edited = false;
 
     public ShuffleCardSenator(Context context) {
         super(context);
@@ -163,7 +164,7 @@ public class ShuffleCardSenator extends ShuffleCard {
         super.shuffleButtons();
         setLongListener();
         setClickListener();
-        LayoutParams params = (LayoutParams) getLayoutParams();
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) getLayoutParams();
         if (computeHeight() < standardMinHeight) {
             params.height = standardMinHeight;
             setLayoutParams(params);
@@ -175,15 +176,15 @@ public class ShuffleCardSenator extends ShuffleCard {
     }
 
     public void startEditMode() {
-        edited = true;
         setTouchListener();
         desk.switch2Edit();
         fulfill();
-        // deleteButton
     }
 
     public void fulfill() {
-        targetHeight = scroller.getHeight();
+        targetHeight = scroller.getHeight() - parentLayout.getHeight()
+                + getHeight();
+
         changeSize(targetHeight);
     }
 
@@ -201,8 +202,6 @@ public class ShuffleCardSenator extends ShuffleCard {
         setClickListener();
         desk.switch2Normal();
         restore();
-        edited = false;
-        // deleteButton
     }
 
     public void setTouchListener() {
@@ -251,10 +250,10 @@ public class ShuffleCardSenator extends ShuffleCard {
 
         @Override
         public boolean onLongClick(View v) {
-            
-            Vibrator vibrator=(Vibrator)getContext().getSystemService(Service.VIBRATOR_SERVICE);
+
+            Vibrator vibrator = (Vibrator) getContext().getSystemService(Service.VIBRATOR_SERVICE);
             vibrator.vibrate(20);
-            
+
             currentButton = (MovableButton) v;
             startEditMode();
             int[] location = {

@@ -1,13 +1,38 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/ctt"
+    android:background="#ffffff"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
+    <RelativeLayout
+        android:id="@+id/custom_head"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="#4b659e" >
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_height="wrap_content"
+            android:text="Back" />
+
+        <TextView
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#ffffff"
+            android:textSize="24sp"
+            android:text="@string/custom_column" />
+    </RelativeLayout>
+
     <ScrollView
         android:id="@+id/scroller"
+        android:layout_marginTop="6dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent"
+        android:layout_below="@id/custom_head"
+        android:background="#f6f7f5" >
     </ScrollView>
 
 </RelativeLayout>

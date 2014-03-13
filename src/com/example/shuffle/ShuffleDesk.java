@@ -12,6 +12,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
@@ -33,7 +34,9 @@ public class ShuffleDesk extends RelativeLayout {
     public static int animateVersion = 11;
     private int minSelectedZoneHeight = 0;
     private ShuffleCardSenator senator;
+    private LinearLayout senatorLayout;
     private ShuffleCardCandidate candidate;
+    private LinearLayout candidateLayout;
     public static int minButtons = 4;
     public static int maxButtons = 24;
     private static Toast mToast = null;
@@ -44,11 +47,14 @@ public class ShuffleDesk extends RelativeLayout {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.layout_shuffle, this);
 
+        candidateLayout = (LinearLayout) findViewById(R.id.CandidateLayout);
+        senatorLayout = (LinearLayout) findViewById(R.id.SenatorLayout);
+
         candidate = (ShuffleCardCandidate) findViewById(R.id.candidate);
         senator = (ShuffleCardSenator) findViewById(R.id.senator);
 
-        candidate.setDesk(this, scrollView);
-        senator.setDesk(this, scrollView);
+        candidate.setDesk(this, scrollView, candidateLayout);
+        senator.setDesk(this, scrollView, senatorLayout);
     }
 
     public ShuffleDesk(Context context, AttributeSet attrs) {
@@ -62,11 +68,11 @@ public class ShuffleDesk extends RelativeLayout {
     }
 
     public void switch2Edit() {
-        candidate.setVisibility(View.GONE);
+        candidateLayout.setVisibility(View.GONE);
     }
 
     public void switch2Normal() {
-        candidate.setVisibility(View.VISIBLE);
+        candidateLayout.setVisibility(View.VISIBLE);
     }
 
     public void InitDatas() {
@@ -102,13 +108,21 @@ public class ShuffleDesk extends RelativeLayout {
             selectedButtons.add(button);
         }
 
-        for (int i = 20; i < 53; i++) {
+        for (int i = 20; i < 30; i++) {
             MovableButton button = new MovableButton(getContext());
             button.setTitle("btn_" + i);
             button.setId(i);
             button.setSelected(false);
             unselectedButtons.add(button);
         }
+    }
+
+    /**
+     * 提交更改
+     */
+    public void commitChanges() {
+        selectedButtons = senator.getList();
+        unselectedButtons = candidate.getList();
     }
 
     private void shuffleButtons() {
