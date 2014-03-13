@@ -266,6 +266,7 @@ public class ShuffleCardSenator extends ShuffleCard {
             ddy = v.getHeight() / 2;
             lastRow = currentButton.getPosition().y;
             lastCol = currentButton.getPosition().x;
+            currentButton.bringToFront();
             return false;
         }
     };
@@ -287,8 +288,7 @@ public class ShuffleCardSenator extends ShuffleCard {
                             lastCol = currentButton.getPosition().x;
                             ddx = event.getX();
                             ddy = event.getY();
-                            ShuffleCardSenator.this.removeView(currentButton);
-                            ShuffleCardSenator.this.addView(currentButton);
+                            currentButton.bringToFront();
                         }
                         break;
                     case MotionEvent.ACTION_MOVE:
