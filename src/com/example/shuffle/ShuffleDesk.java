@@ -12,6 +12,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
@@ -33,7 +34,9 @@ public class ShuffleDesk extends RelativeLayout {
     public static int animateVersion = 11;
     private int minSelectedZoneHeight = 0;
     private ShuffleCardSenator senator;
+    private LinearLayout senatorLayout;
     private ShuffleCardCandidate candidate;
+    private LinearLayout candidateLayout;
     public static int minButtons = 4;
     public static int maxButtons = 24;
     private static Toast mToast = null;
@@ -44,11 +47,14 @@ public class ShuffleDesk extends RelativeLayout {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.layout_shuffle, this);
 
+        candidateLayout = (LinearLayout) findViewById(R.id.CandidateLayout);
+        senatorLayout = (LinearLayout) findViewById(R.id.SenatorLayout);
+
         candidate = (ShuffleCardCandidate) findViewById(R.id.candidate);
         senator = (ShuffleCardSenator) findViewById(R.id.senator);
 
-        candidate.setDesk(this, scrollView);
-        senator.setDesk(this, scrollView);
+        candidate.setDesk(this, scrollView, candidateLayout);
+        senator.setDesk(this, scrollView, senatorLayout);
     }
 
     public ShuffleDesk(Context context, AttributeSet attrs) {
@@ -62,16 +68,14 @@ public class ShuffleDesk extends RelativeLayout {
     }
 
     public void switch2Edit() {
-        candidate.setVisibility(View.GONE);
+        candidateLayout.setVisibility(View.GONE);
     }
 
     public void switch2Normal() {
-        candidate.setVisibility(View.VISIBLE);
+        candidateLayout.setVisibility(View.VISIBLE);
     }
 
     public void InitDatas() {
-
-        getButtons();
 
         vGap = dip2px(vGapDip, getContext());
         hGap = dip2px(hGapDip, getContext());
@@ -93,27 +97,16 @@ public class ShuffleDesk extends RelativeLayout {
         shuffleButtons();
     }
 
-    private void getButtons() {
-        for (int i = 0; i < 12; i++) {
-            MovableButton button = new MovableButton(getContext());
-            button.setTitle("btn_" + i);
-            button.setId(i);
-            button.setSelected(true);
-            selectedButtons.add(button);
-        }
-
-        for (int i = 20; i < 53; i++) {
-            MovableButton button = new MovableButton(getContext());
-            button.setTitle("btn_" + i);
-            button.setId(i);
-            button.setSelected(false);
-            unselectedButtons.add(button);
-        }
-    }
-
     private void shuffleButtons() {
         senator.shuffleButtons();
         candidate.shuffleButtons();
+    }
+    
+    public ArrayList<MovableButton> getButtons() {
+        ArrayList<MovableButton> buttons=new ArrayList<MovableButton>();
+        buttons.addAll(senator.getList());
+        buttons.addAll(candidate.getList());
+        return buttons;
     }
 
     public void slog(String string) {
@@ -154,5 +147,21 @@ public class ShuffleDesk extends RelativeLayout {
 
     public void setCandidate(ShuffleCardCandidate candidate) {
         this.candidate = candidate;
+    }
+
+    public ArrayList<MovableButton> getSelectedButtons() {
+        return selectedButtons;
+    }
+
+    public void setSelectedButtons(ArrayList<MovableButton> selectedButtons) {
+        this.selectedButtons = selectedButtons;
+    }
+
+    public ArrayList<MovableButton> getUnselectedButtons() {
+        return unselectedButtons;
+    }
+
+    public void setUnselectedButtons(ArrayList<MovableButton> unselectedButtons) {
+        this.unselectedButtons = unselectedButtons;
     }
 }
